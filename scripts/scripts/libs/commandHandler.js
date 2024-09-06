@@ -10,7 +10,7 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
  * @typedef {Object} SubCommand 
  * @property {string} name
  * @property {string} description
- * @property {SubCommand[]?} subCommand
+ * @property {SubCommand[]?} subCommands
  * @property {string?} tags
  */
 
@@ -78,7 +78,7 @@ export class CommandHandler {
             entity = ev.sourceEntity;
         } else return;
 
-        const { result, name, splitMessage } = this.command(message, entity);
+        const { result, name } = this.command(message, entity);
 
         if (result || name) {
             if (ev instanceof ChatSendBeforeEvent) {
@@ -94,7 +94,7 @@ export class CommandHandler {
                 try {
                     const module = await import(`${this.commandsPath}/${name}`);
 
-                    module.run(entity, splitMessage);
+                    module.run(entity);
                 } catch { }
             })();
         }
@@ -119,12 +119,12 @@ export class CommandHandler {
         const { result, name } = this.match(this.commands, splitMessage, entity);
 
         if (result && name) {
-            return { result: true, name: splitMessage[0], splitMessage };
+            return { result: true, name: splitMessage[0] };
         } else if (!result && name) {
-            return { result: false, name: splitMessage[0], splitMessage }
+            return { result: false, name: splitMessage[0] }
         }
 
-        return { result: false, name: null, splitMessage };
+        return { result: false, name: null };
     }
 
     /**
@@ -154,9 +154,9 @@ export class CommandHandler {
 
             if (command.name === currentCommand) {
                 if (hasRequiredTags) {
-                    if (command.subCommand) {
+                    if (command.subCommands) {
                         return {
-                            result: this.match(command.subCommand, remainingMessage, entity),
+                            result: this.match(command.subCommands, remainingMessage, entity),
                             name: splitMessage[0]
                         }
                     }
