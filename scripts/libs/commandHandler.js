@@ -1,9 +1,13 @@
 import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
 
 /**
- * @typedef {Object} CommandConfig
+ * @typedef {Object} CommandSetting
  * @property {string} prefix
  * @property {string} id
+ */
+
+/**
+ * @typedef {SubCommand[]} Commands
  */
 
 /**
@@ -16,7 +20,7 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
 
 /**
  * @typedef {Object} WrapCommand 
- * @property {CommandConfig} commandConfig
+ * @property {CommandSetting} commandSetting
  * @property {SubCommand[]} commands 
  */
 
@@ -33,18 +37,18 @@ export class CommandHandler {
     /**
      * コマンドの設定をします
      * @param {string} commandsPath - commandsフォルダーへのパス (commandHandler.jsから)
-     * @param {CommandConfig} commandConfig - コマンドの基本設定
-     * @param {SubCommand[]} commands - コマンド
+     * @param {CommandSetting} commandSetting - コマンドの基本設定
+     * @param {Commands} commands - コマンド
      */
-    constructor(commandsPath, commandConfig, commands) {
+    constructor(commandsPath, commandSetting, commands) {
         this.uuid = generateUUIDv4();
         this.commandsPath = commandsPath;
-        this.commandConfig = commandConfig;
+        this.commandSetting = commandSetting;
         this.commands = commands;
 
         if (!wrapCommands.has(this.uuid)) {
             wrapCommands.set(this.uuid, {
-                commandConfig: this.commandConfig,
+                commandSetting: this.commandSetting,
                 commands: this.commands
             });
 
@@ -106,7 +110,7 @@ export class CommandHandler {
      * @returns {CheckReturn}
      */
     command(message, entity) {
-        const { prefix, id } = this.commandConfig;
+        const { prefix, id } = this.commandSetting;
 
         if (message.startsWith(prefix) || message.startsWith(id)) {
             message = message.replace(prefix, "").trim();

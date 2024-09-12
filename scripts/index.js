@@ -7,8 +7,8 @@ commandHandler: {
     // commandsへのpath
     const commandsPath = "../commands";
 
-    /** @type {import("./libs/commandHandler").CommandConfig} */
-    const commandConfig = {
+    /** @type {import("./libs/commandHandler").CommandSetting} */
+    const commandSetting = {
         prefix: "",
         id: "a:b"
     };
@@ -21,7 +21,7 @@ commandHandler: {
         }
     ];
     
-    const commandHandler = new CommandHandler(commandsPath, commandConfig, commands);
+    const commandHandler = new CommandHandler(commandsPath, commandSetting, commands);
     
     world.beforeEvents.chatSend.subscribe(ev => {
         commandHandler.check(ev);
