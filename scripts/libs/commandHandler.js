@@ -25,9 +25,17 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
  */
 
 /**
- * @typedef {Object} CheckReturn
+ * @typedef {Object} CommandReturn
  * @property {boolean} result
  * @property {string?} name
+ * @property {string[]} splitMessage
+ */
+
+/**
+ * @typedef {Object} MatchReturn
+ * @property {boolean} result
+ * @property {string?} name
+ * @property {string[]} remainingMessage
  */
 
 /** @type {Map<string, WrapCommand>} */
@@ -39,8 +47,9 @@ export class CommandHandler {
      * @param {string} commandsPath - commandsフォルダーへのパス (commandHandler.jsから)
      * @param {CommandSetting} commandSetting - コマンドの基本設定
      * @param {Commands} commands - コマンド
+     * @param {boolean} log - コマンドの登録をログで確認する
      */
-    constructor(commandsPath, commandSetting, commands) {
+    constructor(commandsPath, commandSetting, commands, log = false) {
         this.uuid = generateUUIDv4();
         this.commandsPath = commandsPath;
         this.commandSetting = commandSetting;
@@ -55,9 +64,13 @@ export class CommandHandler {
             (async () => {
                 for (const command of this.commands) {
                     const name = command.name;
-    
+
                     try {
                         await import(`${this.commandsPath}/${name}`);
+
+                        if (log) {
+                            console.warn(`${name}がコマンドとして登録されました`);
+                        }
                     } catch (e) {
                         console.error(`${name}は${this.commandsPath}内にないため処理されません`);
                     }
@@ -82,11 +95,16 @@ export class CommandHandler {
             entity = ev.sourceEntity;
         } else return;
 
-        const { result, name } = this.command(message, entity);
+        const { result, name, splitMessage } = this.command(message, entity);
 
         if (result || name) {
             if (ev instanceof ChatSendBeforeEvent) {
                 ev.cancel = true;
+            }
+
+            if (!name && entity instanceof Player) {
+                entity.sendMessage(`§cエラー: 無効なコマンドです。`);
+                return;
             }
 
             if (!result && name && entity instanceof Player) {
@@ -98,8 +116,10 @@ export class CommandHandler {
                 try {
                     const module = await import(`${this.commandsPath}/${name}`);
 
-                    module.run(entity);
-                } catch { }
+                    module.run(entity, splitMessage);
+                } catch (e) {
+                    console.error(e);
+                }
             })();
         }
     }
@@ -107,7 +127,7 @@ export class CommandHandler {
     /**
      * @param {string} message 
      * @param {Entity?} entity 
-     * @returns {CheckReturn}
+     * @returns {CommandReturn}
      */
     command(message, entity) {
         const { prefix, id } = this.commandSetting;
@@ -116,34 +136,34 @@ export class CommandHandler {
             message = message.replace(prefix, "").trim();
             message = message.replace(id, "").trim();
         } else {
-            return { result: false, name: null };
+            return { result: false, name: null, splitMessage: [] };
         }
 
         const splitMessage = message.split(" ");
-        const { result, name } = this.match(this.commands, splitMessage, entity);
+        const { result, name, remainingMessage } = this.match(this.commands, splitMessage, entity);
 
         if (result && name) {
-            return { result: true, name: splitMessage[0] };
+            return { result: true, name: splitMessage[0], splitMessage: remainingMessage };
         } else if (!result && name) {
-            return { result: false, name: splitMessage[0] }
+            return { result: false, name: splitMessage[0], splitMessage: remainingMessage };
         }
 
-        return { result: false, name: null };
+        return { result: true, name: null, splitMessage };
     }
 
     /**
-     * 
      * @param {SubCommand[]} commands 
      * @param {string[]} splitMessage 
      * @param {Entity?} entity 
-     * @returns {CheckReturn}
+     * @returns {MatchReturn}
      */
     match(commands, splitMessage, entity) {
         if (splitMessage.length === 0) {
             return {
                 result: true,
-                name: splitMessage[0]
-            }
+                name: splitMessage[0],
+                remainingMessage: []
+            };
         }
 
         const currentCommand = splitMessage[0];
@@ -159,29 +179,34 @@ export class CommandHandler {
             if (command.name === currentCommand) {
                 if (hasRequiredTags) {
                     if (command.subCommands) {
+                        const matchResult = this.match(command.subCommands, remainingMessage, entity);
                         return {
-                            result: this.match(command.subCommands, remainingMessage, entity),
-                            name: splitMessage[0]
-                        }
+                            result: matchResult.result,
+                            name: splitMessage[0],
+                            remainingMessage: matchResult.remainingMessage
+                        };
                     }
 
                     return {
                         result: true,
-                        name: splitMessage[0]
-                    }
+                        name: splitMessage[0],
+                        remainingMessage
+                    };
                 }
 
                 return {
                     result: false,
-                    name: splitMessage[0]
-                }
+                    name: splitMessage[0],
+                    remainingMessage
+                };
             }
         }
 
         return {
             result: false,
-            name: null
-        }
+            name: null,
+            remainingMessage: splitMessage
+        };
     }
 }
 
