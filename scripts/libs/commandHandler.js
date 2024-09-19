@@ -146,6 +146,10 @@ export class CommandHandler {
             return { result: true, name: splitMessage[0], splitMessage: remainingMessage };
         } else if (!result && name) {
             return { result: false, name: splitMessage[0], splitMessage: remainingMessage };
+        } else if (prefix === "") {
+            return { result: false, name: null, splitMessage: [] };
+        } else if (id === "") {
+            return { result: false, name: null, splitMessage: [] };
         }
 
         return { result: true, name: null, splitMessage };
