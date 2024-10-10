@@ -3,6 +3,8 @@ import { CommandHandler } from "./libs/commandHandler";
 import playerMoveBeforeEvent from "./libs/playerMoveBeforeEvent";
 import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
 import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
+import playerRideAfterEvent from "./libs/playerRideAfterEvent";
+import playerGetOffAfterEvent from "./libs/playerGetOffAfterEvent";
 
 commandHandler: {
     // commandsへのpath
@@ -33,9 +35,9 @@ playerDropBeforeEvent: {
     playerDropBeforeEvent.subscribe(ev => {
         const { player, slot, oldItemStack, newItemStack, container } = ev;
 
-        player.sendMessage(`ドロップされたスロット: ${slot}`);
-        player.sendMessage(`ドロップ前のアイテム: ${oldItemStack.typeId}`);
-        player.sendMessage(`ドロップ後のアイテム: ${newItemStack ? newItemStack.typeId : "minecraft:air"}`);
+        // player.sendMessage(`ドロップされたスロット: ${slot}`);
+        // player.sendMessage(`ドロップ前のアイテム: ${oldItemStack.typeId}`);
+        // player.sendMessage(`ドロップ後のアイテム: ${newItemStack ? newItemStack.typeId : "minecraft:air"}`);
     
         // ev.cancel = true;
     });
@@ -59,5 +61,21 @@ playerFishingAfterEvent: {
         player.sendMessage(`釣れたアイテムID: ${itemStack ? itemStack.typeId : ""}`);
         player.sendMessage(`釣れたアイテムエンティティ: ${itemEntity ? itemEntity.typeId : ""}`);
         player.sendMessage(`釣ったプレイヤー: ${player.name}`);
+    });
+}
+
+playerRideAfterEvent: {
+    playerRideAfterEvent.subscribe(ev => {
+        const { player, entity } = ev;
+
+        player.sendMessage(`${entity.typeId}`);
+    });
+}
+
+playerGetOffAfterEvent: {
+    playerGetOffAfterEvent.subscribe(ev => {
+        const { player, entity } = ev;
+
+        player.sendMessage(`${entity.typeId}`);
     });
 }

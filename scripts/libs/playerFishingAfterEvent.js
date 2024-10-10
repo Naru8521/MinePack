@@ -58,6 +58,7 @@ world.afterEvents.entitySpawn.subscribe(ev => {
 
         if (keys.length > 0) {
             const lastKey = keys[keys.length - 1];
+            const player = getPlayerFromId(lastKey);
 
             fishingPlayerIds.set(lastKey, entity.id);
         }
@@ -106,3 +107,17 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         callbacks.forEach((_, callback) => callback(event));
     }
 });
+
+/**
+ * @param {string} id 
+ * @returns {Player}
+ */
+function getPlayerFromId(id) {
+    const players = world.getAllPlayers();
+
+    for (const player of players) {
+        if (player.id === id) {
+            return player;
+        }
+    }
+}

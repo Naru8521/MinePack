@@ -11,7 +11,7 @@ import { system, world, Player, Container, ItemStack, Entity, Dimension } from "
  * @property {number} slot - イベントが起こったスロット
  * @property {Container} container - イベント後のコンテナー
  * @property {ItemStack} oldItemStack - イベントが起こる前のインベントリのアイテム
- * @property {ItemStack | undefined} newItemStack - イベントが起こった後のインベントリのアイテム
+ * @property {ItemStack?} newItemStack - イベントが起こった後のインベントリのアイテム
  * @property {boolean} cancel - イベントをキャンセルするかどうか
  */
 
@@ -191,9 +191,9 @@ function copyContainer(container) {
  * @param {Container} c1 
  * @returns {{
  *  slot: number,
- *  oldItemStack: ItemStack,
- *  newItemStack: ItemStack | undefined
- * } | undefined}
+*   oldItemStack: ItemStack,
+*   newItemStack: ItemStack?
+ * }?}
  */
 function getComparisonContainer(player, c0, c1) {
     const dropItem = isDropItem(player);
