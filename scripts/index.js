@@ -32,6 +32,10 @@ commandHandler: {
 playerDropBeforeEvent: {
     playerDropBeforeEvent.subscribe(ev => {
         const { player, slot, oldItemStack, newItemStack, container } = ev;
+
+        player.sendMessage(`ドロップされたスロット: ${slot}`);
+        player.sendMessage(`ドロップ前のアイテム: ${oldItemStack.typeId}`);
+        player.sendMessage(`ドロップ後のアイテム: ${newItemStack ? newItemStack.typeId : "minecraft:air"}`);
     
         // ev.cancel = true;
     });

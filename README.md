@@ -1,11 +1,15 @@
 ## 目次
+
 1. [commandHandler](#anchor1)
 2. [playerDropBeforeEvent](#anchor2)
 3. [playerMoveBeforeEvent](#anchor3)
 
 <a id="anchor1"></a>
+
 # 1. commandHandler
+
 コマンドのprefixとidを設定します。
+
 ```javascript
 const commandConfig = {
     prefix: "",
@@ -14,6 +18,7 @@ const commandConfig = {
 ```
 
 コマンドを設定します
+
 ```javascript
 const commands = [
     {
@@ -35,11 +40,13 @@ const commands = [
 ```
 
 コマンドを初期化します
+
 ```javascript
 const commandHandler = new CommandHandler(commandsPath, commandConfig, commands);
 ```
 
 チャットコマンドをチェックします
+
 ```javascript
 world.beforeEvents.chatSend.subscribe(ev => {
     commandHandler.check(ev);
@@ -47,19 +54,29 @@ world.beforeEvents.chatSend.subscribe(ev => {
 ```
 
 <a id="anchor2"></a>
+
 # 2. playerDropBeforeEvent
+
 プレイヤーがアイテムをドロップしたときに呼び出されます
+
 ```javascript
 playerDropBeforeEvent.subscribe(ev => {
     const { player, slot, oldItemStack, newItemStack, container } = ev;
 
-    ev.cancel = true;
+    player.sendMessage(`ドロップされたスロット: ${slot}`);
+    player.sendMessage(`ドロップ前のアイテム: ${oldItemStack.typeId}`);
+    player.sendMessage(`ドロップ後のアイテム: ${newItemStack ? newItemStack.typeId : "minecraft:air"}`);
+    
+    // ev.cancel = true;
 });
 ```
 
 <a id="anchor3"></a>
+
 # 3. playerMoveBeforeEvent
+
 プレイヤーが動いた時に呼び出されます
+
 ```javascript
 playerMoveBeforeEvent.subscribe(ev => {
     const { player, keys } = ev;
@@ -67,5 +84,22 @@ playerMoveBeforeEvent.subscribe(ev => {
     player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
 
     ev.cancel = true;
+});
+```
+
+<a id="anchor4"></a>
+
+# 3. playerFishingAfterEvent
+
+プレイヤーが釣りをした時に呼び出されます
+
+```javascript
+playerFishingAfterEvent.subscribe(ev => {
+    const { player, itemStack, itemEntity, result } = ev;
+
+    player.sendMessage(`釣りに成功: ${result}`);
+    player.sendMessage(`釣れたアイテムID: ${itemStack ? itemStack.typeId : ""}`);
+    player.sendMessage(`釣れたアイテムエンティティ: ${itemEntity ? itemEntity.typeId : ""}`);
+    player.sendMessage(`釣ったプレイヤー: ${player.name}`);
 });
 ```
