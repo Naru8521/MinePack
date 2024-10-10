@@ -58,7 +58,6 @@ world.afterEvents.entitySpawn.subscribe(ev => {
 
         if (keys.length > 0) {
             const lastKey = keys[keys.length - 1];
-            const player = getPlayerFromId(lastKey);
 
             fishingPlayerIds.set(lastKey, entity.id);
         }
