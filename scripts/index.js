@@ -2,6 +2,7 @@ import { world } from "@minecraft/server";
 import { CommandHandler } from "./libs/commandHandler";
 import playerMoveBeforeEvent from "./libs/playerMoveBeforeEvent";
 import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
+import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
 
 commandHandler: {
     // commandsへのpath
@@ -43,5 +44,16 @@ playerMoveBeforeEvent: {
         player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
     
         // ev.cancel = true;
+    });
+}
+
+playerFishingAfterEvent: {
+    playerFishingAfterEvent.subscribe(ev => {
+        const { player, itemStack, itemEntity, result } = ev;
+
+        player.sendMessage(`釣りに成功: ${result}`);
+        player.sendMessage(`釣れたアイテムID: ${itemStack ? itemStack.typeId : ""}`);
+        player.sendMessage(`釣れたアイテムエンティティ: ${itemEntity ? itemEntity.typeId : ""}`);
+        player.sendMessage(`釣ったプレイヤー: ${player.name}`);
     });
 }
