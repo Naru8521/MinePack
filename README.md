@@ -3,6 +3,7 @@
 1. [commandHandler](#anchor1)
 2. [playerDropBeforeEvent](#anchor2)
 3. [playerMoveBeforeEvent](#anchor3)
+4. [playerFishingAfterEvent](#anchor4)
 
 <a id="anchor1"></a>
 
