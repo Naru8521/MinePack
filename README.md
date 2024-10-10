@@ -4,6 +4,8 @@
 2. [playerDropBeforeEvent](#anchor2)
 3. [playerMoveBeforeEvent](#anchor3)
 4. [playerFishingAfterEvent](#anchor4)
+5. [playerRideAfterEvent](#anchor5)
+6. [playerGetOffAfterEvent](#anchor6)
 
 <a id="anchor1"></a>
 
@@ -102,5 +104,33 @@ playerFishingAfterEvent.subscribe(ev => {
     player.sendMessage(`釣れたアイテムID: ${itemStack ? itemStack.typeId : ""}`);
     player.sendMessage(`釣れたアイテムエンティティ: ${itemEntity ? itemEntity.typeId : ""}`);
     player.sendMessage(`釣ったプレイヤー: ${player.name}`);
+});
+```
+
+<a id="anchor5"></a>
+
+# 4. playerRideAfterEvent
+
+プレイヤーがエンティティに乗ったときに呼び出されます
+
+```javascript
+playerRideAfterEvent.subscribe(ev => {
+    const { player, entity } = ev;
+
+    player.sendMessage(`${entity.typeId}`);
+});
+```
+
+<a id="anchor6"></a>
+
+# 4. playerGetOffAfterEvent
+
+プレイヤーがエンティティから降りた時に呼び出されます
+
+```javascript
+playerGetOffAfterEvent.subscribe(ev => {
+    const { player, entity } = ev;
+
+    player.sendMessage(`${entity.typeId}`);
 });
 ```
