@@ -109,7 +109,7 @@ playerFishingAfterEvent.subscribe(ev => {
 
 <a id="anchor5"></a>
 
-# 4. playerRideAfterEvent
+# 5. playerRideAfterEvent
 
 プレイヤーがエンティティに乗ったときに呼び出されます
 
@@ -123,7 +123,7 @@ playerRideAfterEvent.subscribe(ev => {
 
 <a id="anchor6"></a>
 
-# 4. playerGetOffAfterEvent
+# 6. playerGetOffAfterEvent
 
 プレイヤーがエンティティから降りた時に呼び出されます
 
