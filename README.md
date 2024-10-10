@@ -90,7 +90,7 @@ playerMoveBeforeEvent.subscribe(ev => {
 
 <a id="anchor4"></a>
 
-# 3. playerFishingAfterEvent
+# 4. playerFishingAfterEvent
 
 プレイヤーが釣りをした時に呼び出されます
 
