@@ -5,6 +5,7 @@ import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
 import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
 import playerRideAfterEvent from "./libs/playerRideAfterEvent";
 import playerGetOffAfterEvent from "./libs/playerGetOffAfterEvent";
+import playerXpChangeAfterEvent from "./libs/playerXpChangeAfterEvent";
 
 commandHandler: {
     // commandsへのpath
@@ -77,5 +78,13 @@ playerGetOffAfterEvent: {
         const { player, entity } = ev;
 
         player.sendMessage(`${entity.typeId}`);
+    });
+}
+
+playerXpChangeAfterEvent: {
+    playerXpChangeAfterEvent.subscribe(ev => {
+        const { player, xp } = ev;
+
+        world.sendMessage(player.name + `: ${xp}`);
     });
 }
