@@ -85,6 +85,6 @@ playerXpChangeAfterEvent: {
     playerXpChangeAfterEvent.subscribe(ev => {
         const { player, xp } = ev;
 
-        world.sendMessage(player.name + `: ${xp}`);
+        world.sendMessage("§e" + player.name + `: ${xp}`);
     });
 }

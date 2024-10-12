@@ -6,6 +6,7 @@
 4. [playerFishingAfterEvent](#anchor4)
 5. [playerRideAfterEvent](#anchor5)
 6. [playerGetOffAfterEvent](#anchor6)
+7. [playerXpChangeAfterEvent](#anchor7)
 
 <a id="anchor1"></a>
 
@@ -132,5 +133,19 @@ playerGetOffAfterEvent.subscribe(ev => {
     const { player, entity } = ev;
 
     player.sendMessage(`${entity.typeId}`);
+});
+```
+
+<a id="anchor7"></a>
+
+# 7. playerXpChangeAfterEvent
+
+プレイヤーのXPに変化が起きた時に呼び出されます
+
+```javascript
+playerXpChangeAfterEvent.subscribe(ev => {
+    const { player, xp } = ev;
+
+    world.sendMessage("§e" + player.name + `: ${xp}`); 
 });
 ```

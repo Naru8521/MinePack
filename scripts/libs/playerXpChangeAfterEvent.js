@@ -44,7 +44,7 @@ system.runInterval(() => {
         const totalXp = player.getTotalXp();
         let dyTotalXp = player.getDynamicProperty("totalXp");
 
-        if (!dyTotalXp) {
+        if (!dyTotalXp === undefined) {
             dyTotalXp = totalXp;
             player.setDynamicProperty("totalXp", totalXp);
         }
