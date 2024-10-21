@@ -14,7 +14,7 @@ import { world, system, Player, ItemStack, Entity } from "@minecraft/server";
  */
 
 const callbacks = new Map();
-const fishingEntityIds = new Map();
+const fishingPlayerIds = new Map();
 
 export default class playerFishingAfterEvent {
     /**
@@ -40,12 +40,29 @@ export default class playerFishingAfterEvent {
     }
 }
 
-world.afterEvents.projectileHitBlock.subscribe(ev => {
-    const { projectile, source } = ev;
+world.beforeEvents.itemUse.subscribe(ev => {
+    const { source, itemStack } = ev;
 
-    if (source && projectile.typeId === "minecraft:fishing_hook") {
-        if (!fishingEntityIds.has(source.id)) {
-            fishingEntityIds.set(source.id, projectile.id);
+    if (itemStack.typeId === "minecraft:fishing_rod") {
+        if (!fishingPlayerIds.has(source.id)) {
+            fishingPlayerIds.set(source.id, undefined);
+        }
+    }
+});
+
+world.afterEvents.entitySpawn.subscribe(ev => {
+    const { entity } = ev;
+
+    if (entity.typeId === "minecraft:fishing_hook") {
+        const dimension = entity.dimension;
+        const player = dimension.getEntities({
+            type: "minecraft:player",
+            location: entity.location,
+            closest: 1
+        })[0];
+
+        if (player) {
+            fishingPlayerIds.set(player.id, entity.id);
         }
     }
 });
@@ -70,13 +87,13 @@ world.beforeEvents.entityRemove.subscribe(ev => {
             maxDistance: 0.2
         })[0];
 
-        const ids = [...fishingEntityIds.keys()];
+        const ids = [...fishingPlayerIds.keys()];
 
         // プレイヤーをセット
         for (const id of ids) {
-            if (fishingEntityIds.get(id) === removedEntity.id) {
+            if (fishingPlayerIds.get(id) === removedEntity.id) {
                 event.player = getPlayerFromId(id);
-                fishingEntityIds.delete(id);
+                fishingPlayerIds.delete(id);
             }
         }
 
