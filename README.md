@@ -15,7 +15,7 @@
 コマンドのprefixとidを設定します。
 
 ```javascript
-const commandConfig = {
+const commandSetting = {
     prefix: "",
     id: "a:b"
 };
