@@ -46,7 +46,7 @@ const commands = [
 コマンドを初期化します
 
 ```javascript
-const commandHandler = new CommandHandler(commandsPath, commandConfig, commands);
+const commandHandler = new CommandHandler(commandsPath, commandSetting, commands);
 ```
 
 チャットコマンドをチェックします
