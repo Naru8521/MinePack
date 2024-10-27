@@ -7,6 +7,7 @@
 5. [playerRideAfterEvent](#anchor5)
 6. [playerGetOffAfterEvent](#anchor6)
 7. [playerXpChangeAfterEvent](#anchor7)
+8. [tagChangeAfterEvent](#anchor8)
 
 <a id="anchor1"></a>
 
@@ -149,6 +150,8 @@ playerXpChangeAfterEvent.subscribe(ev => {
     world.sendMessage("§e" + player.name + `: ${xp}`); 
 });
 ```
+
+<a id="anchor8"></a>
 
 # 8. tagChangeAfterEvent
 
