@@ -13,7 +13,7 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
 /**
  * @typedef {Object} SubCommand 
  * @property {string} name
- * @property {string} description
+ * @property {string?} description
  * @property {SubCommand[]?} subCommands
  * @property {string?} tags
  */

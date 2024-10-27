@@ -6,6 +6,7 @@ import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
 import playerRideAfterEvent from "./libs/playerRideAfterEvent";
 import playerGetOffAfterEvent from "./libs/playerGetOffAfterEvent";
 import playerXpChangeAfterEvent from "./libs/playerXpChangeAfterEvent";
+import tagChangeAfterEvent from "./libs/tagChangeAfterEvent";
 
 commandHandler: {
     // commandsへのpath
@@ -86,5 +87,15 @@ playerXpChangeAfterEvent: {
         const { player, xp } = ev;
 
         world.sendMessage("§e" + player.name + `: ${xp}`);
+    });
+}
+
+tagChangeAfterEvent: {
+    tagChangeAfterEvent.subscribe(ev => {
+        const { entity, tags, addTags, removeTags } = ev;
+
+        entity.sendMessage(`tag - ${tags}`);
+        entity.sendMessage(`add - ${addTags}`);
+        entity.sendMessage(`remove - ${removeTags}`);
     });
 }

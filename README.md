@@ -149,3 +149,17 @@ playerXpChangeAfterEvent.subscribe(ev => {
     world.sendMessage("§e" + player.name + `: ${xp}`); 
 });
 ```
+
+# 8. tagChangeAfterEvent
+
+エンティティのタグに変化が起きた時に呼び出されます
+
+```javascript
+tagChangeAfterEvent.subscribe(ev => {
+    const { entity, tags, addTags, removeTags } = ev;
+
+    entity.sendMessage(`tag - ${tags}`);
+    entity.sendMessage(`add - ${addTags}`);
+    entity.sendMessage(`remove - ${removeTags}`);
+});
+```
