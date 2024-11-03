@@ -12,6 +12,7 @@ import { system, world, Player, Container, ItemStack, Entity, Dimension } from "
  * @property {Container} container - イベント後のコンテナー
  * @property {ItemStack} oldItemStack - イベントが起こる前のインベントリのアイテム
  * @property {ItemStack?} newItemStack - イベントが起こった後のインベントリのアイテム
+ * @property {ItemStack} itemStack - ドロップされたアイテム
  * @property {boolean} cancel - イベントをキャンセルするかどうか
  */
 
@@ -61,6 +62,7 @@ system.runInterval(() => {
 
             if (comparison) {
                 const { slot, oldItemStack, newItemStack } = comparison;
+                const dropItem = isDropItem(player);
                 /** @type {PlayerDropBeforeEvent} */
                 let event = {
                     player: player,
@@ -68,14 +70,13 @@ system.runInterval(() => {
                     container: newContainer,
                     oldItemStack: oldItemStack,
                     newItemStack: newItemStack,
+                    itemStack: dropItem.getComponent("item").itemStack,
                     cancel: false,
                 };
 
                 callbacks.forEach((_, callback) => callback(event));
 
                 if (event.cancel) {
-                    const dropItem = isDropItem(player);
-
                     if (dropItem) {
                         dropItem.remove();
                     }
