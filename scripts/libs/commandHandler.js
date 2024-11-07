@@ -1,4 +1,4 @@
-import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
+import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent, world } from "@minecraft/server";
 
 /**
  * @typedef {Object} CommandSetting
@@ -26,6 +26,7 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
 
 /**
  * @typedef {Object} CommandReturn
+ * @property {boolean} isPrefixId
  * @property {boolean} result
  * @property {string?} name
  * @property {string[]} splitMessage
@@ -95,9 +96,9 @@ export class CommandHandler {
             entity = ev.sourceEntity;
         } else return;
 
-        const { result, name, splitMessage } = this.command(message, entity);
+        const { isPrefixId, result, name, splitMessage } = this.command(message, entity);
 
-        if (result || name) {
+        if (isPrefixId || result || name) {
             if (ev instanceof ChatSendBeforeEvent) {
                 ev.cancel = true;
             }
@@ -136,23 +137,23 @@ export class CommandHandler {
             message = message.replace(prefix, "").trim();
             message = message.replace(id, "").trim();
         } else {
-            return { result: false, name: null, splitMessage: [] };
+            return { isPrefixId: false, result: false, name: null, splitMessage: [] };
         }
 
         const splitMessage = message.split(" ");
         const { result, name, remainingMessage } = this.match(this.commands, splitMessage, entity);
 
         if (result && name) {
-            return { result: true, name: splitMessage[0], splitMessage: remainingMessage };
+            return { isPrefixId: true, result: true, name: name, splitMessage: remainingMessage };
         } else if (!result && name) {
-            return { result: false, name: splitMessage[0], splitMessage: remainingMessage };
+            return { isPrefixId: true, result: false, name: name, splitMessage: remainingMessage };
         } else if (prefix === "") {
-            return { result: false, name: null, splitMessage: [] };
+            return { isPrefixId: true, result: false, name: null, splitMessage: [] };
         } else if (id === "") {
-            return { result: false, name: null, splitMessage: [] };
+            return { isPrefixId: true, result: false, name: null, splitMessage: [] };
         }
 
-        return { result: true, name: null, splitMessage };
+        return { isPrefixId: true, result: true, name: null, splitMessage };
     }
 
     /**
@@ -184,9 +185,10 @@ export class CommandHandler {
                 if (hasRequiredTags) {
                     if (command.subCommands) {
                         const matchResult = this.match(command.subCommands, remainingMessage, entity);
+
                         return {
                             result: matchResult.result,
-                            name: splitMessage[0],
+                            name: matchResult.name,
                             remainingMessage: matchResult.remainingMessage
                         };
                     }
