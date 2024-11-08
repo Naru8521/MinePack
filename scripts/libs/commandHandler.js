@@ -62,18 +62,19 @@ export class CommandHandler {
                 commands: this.commands
             });
 
-            (async () => {
-                for (const command of this.commands) {
-                    const name = command.name;
+            const commands = this.getAllSubCommands(this.commands);
 
+            (async () => {
+                for (const command of commands) {
                     try {
-                        await import(`${this.commandsPath}/${name}`);
+                        await import(`${this.commandsPath}/${command}`);
 
                         if (log) {
-                            console.warn(`${name}がコマンドとして登録されました`);
+                            console.warn(`${command}がコマンドとして登録されました`);
                         }
                     } catch (e) {
-                        console.error(`${name}は${this.commandsPath}内にないため処理されません`);
+                        console.error(e);
+                        console.error(`${command}は${this.commandsPath}内にないため処理されません`);
                     }
                 }
             })();
@@ -213,6 +214,25 @@ export class CommandHandler {
             name: null,
             remainingMessage: splitMessage
         };
+    }
+
+    /**
+     * 最下層のコマンド名を取得します
+     * @param {SubCommand[]} commands - コマンドのリスト
+     * @returns {string[]} - 最下層のコマンド名のリスト
+     */
+    getAllSubCommands(commands) {
+        const bottomCommands = [];
+
+        for (const command of commands) {
+            if (command.subCommands && command.subCommands.length > 0) {
+                bottomCommands.push(...this.getAllSubCommands(command.subCommands));
+            } else {
+                bottomCommands.push(command.name);
+            }
+        }
+
+        return bottomCommands;
     }
 }
 
