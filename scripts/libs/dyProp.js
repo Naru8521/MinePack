@@ -1,4 +1,4 @@
-import { World, Entity, Player, ItemStack } from "@minecraft/server";
+import { World, Entity, Player, ItemStack, world } from "@minecraft/server";
 
 export class DyProp {
     /**
@@ -138,6 +138,7 @@ export class DyProp {
 
             if (this.hasKey(newKey)) {
                 result.push(this.get(newKey));
+                i++;
             } else {
                 break;
             }
