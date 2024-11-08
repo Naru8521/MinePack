@@ -1,4 +1,4 @@
-import { World, Entity, Player, ItemStack, world } from "@minecraft/server";
+import { World, Entity, Player, ItemStack } from "@minecraft/server";
 
 export class DyProp {
     /**
@@ -113,12 +113,8 @@ export class DyProp {
         while (i < splitValues.length) {
             const newKey = `${key}_${i}`;
 
-            if (!this.hasKey(newKey)) {
-                this.set(newKey, splitValues[i]);
-                i++;
-            } else {
-                i++;
-            }
+            this.set(newKey, splitValues[i]);
+            i++;
         }
     }
 
@@ -145,6 +141,26 @@ export class DyProp {
         }
 
         return result.flat();
+    }
+
+    /**
+     * 指定されたKeyの永続的データを削除します。
+     * @param {string} key 
+     */
+    whileRemoveArray(key) {
+        this.validateKey(key);
+        let i = 0;
+
+        while (true) {
+            const newKey = `${key}_${i}`;
+
+            if (this.hasKey(newKey)) {
+                this.remove(newKey);
+                i++;
+            } else {
+                break;
+            }
+        }
     }
 
     /**
