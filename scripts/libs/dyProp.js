@@ -106,16 +106,19 @@ export class DyProp {
             throw new Error("valueはArray型である必要があります");
         }
 
+        // 既存のデータを一度削除する
+        this.whileRemoveArray(key);
+
+        if (value.length === 0) {
+            return; // 空の配列の場合、何も保存しない
+        }
+
         const splitValues = this.splitArrayByByteSize(value);
 
-        let i = 0;
-
-        while (i < splitValues.length) {
+        splitValues.forEach((chunk, i) => {
             const newKey = `${key}_${i}`;
-
-            this.set(newKey, splitValues[i]);
-            i++;
-        }
+            this.set(newKey, chunk);
+        });
     }
 
     /**
@@ -161,6 +164,9 @@ export class DyProp {
                 break;
             }
         }
+
+        // 配列全体を削除する
+        this.remove(key);
     }
 
     /**
