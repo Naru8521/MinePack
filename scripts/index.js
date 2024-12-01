@@ -14,7 +14,7 @@ commandHandler: {
 
     /** @type {import("./libs/commandHandler").CommandSetting} */
     const commandSetting = {
-        prefix: "",
+        prefix: "!",
         id: "a:b"
     };
     
