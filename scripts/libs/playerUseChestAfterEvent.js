@@ -1,4 +1,4 @@
-import { Block, Container, Player, world } from "@minecraft/server";
+import { Block, BlockComponentTypes, BlockVolume, BoundingBoxUtils, Container, Player, world } from "@minecraft/server";
 
 /**
  * @callback PlayerUseChestAfterEventCallback
@@ -9,6 +9,7 @@ import { Block, Container, Player, world } from "@minecraft/server";
  * @typedef {Object} PlayerUseChestAfterEvent 
  * @property {Player} player - 使用したプレイヤー
  * @property {Block} interactBlock - 使用されたブロック
+ * @property {boolean} isFirstEvent - 最初のイベントかどうか
  * @property {boolean} isLarge - ラージチェストかどうか
  * @property {ChestPair?} chestPair - isLargeがtrueの時のみ存在
  */
@@ -47,20 +48,18 @@ export default class playerUseChestAfterEvent {
 
 world.afterEvents.playerInteractWithBlock.subscribe(ev => {
     const { player, isFirstEvent, block } = ev;
+    const largeChest = getLargeChest(block);
 
-    if (isFirstEvent) {
-        const largeChest = getLargeChest(block);
+    /** @type {PlayerUseChestAfterEvent} */
+    let events = {
+        player,
+        interactBlock: block,
+        isFirstEvent,
+        isLarge: largeChest ? true : false,
+        chestPair: largeChest
+    };
 
-        /** @type {PlayerUseChestAfterEvent} */
-        let events = {
-            player,
-            interactBlock: block,
-            isLarge: largeChest ? true : false,
-            chestPair: largeChest
-        };
-
-        callbacks.forEach((_, callback) => callback(events));
-    }
+    callbacks.forEach((_, callback) => callback(events));
 });
 
 /**
