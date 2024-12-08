@@ -1,6 +1,6 @@
 import { World, Entity, Player, ItemStack } from "@minecraft/server";
 
-export class DyProp {
+export default class DyProp {
     /**
      * @param {World | Entity | Player | ItemStack} target - 操作対象のオブジェクト
      */
@@ -106,19 +106,20 @@ export class DyProp {
             throw new Error("valueはArray型である必要があります");
         }
 
-        // 既存のデータを一度削除する
-        this.whileRemoveArray(key);
-
-        if (value.length === 0) {
-            return; // 空の配列の場合、何も保存しない
-        }
-
         const splitValues = this.splitArrayByByteSize(value);
 
-        splitValues.forEach((chunk, i) => {
+        let i = 0;
+
+        while (i < splitValues.length) {
             const newKey = `${key}_${i}`;
-            this.set(newKey, chunk);
-        });
+
+            if (!this.hasKey(newKey)) {
+                this.set(newKey, splitValues[i]);
+                i++;
+            } else {
+                i++;
+            }
+        }
     }
 
     /**
@@ -137,36 +138,12 @@ export class DyProp {
 
             if (this.hasKey(newKey)) {
                 result.push(this.get(newKey));
-                i++;
             } else {
                 break;
             }
         }
 
         return result.flat();
-    }
-
-    /**
-     * 指定されたKeyの永続的データを削除します。
-     * @param {string} key 
-     */
-    whileRemoveArray(key) {
-        this.validateKey(key);
-        let i = 0;
-
-        while (true) {
-            const newKey = `${key}_${i}`;
-
-            if (this.hasKey(newKey)) {
-                this.remove(newKey);
-                i++;
-            } else {
-                break;
-            }
-        }
-
-        // 配列全体を削除する
-        this.remove(key);
     }
 
     /**

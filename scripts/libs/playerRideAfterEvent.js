@@ -47,14 +47,14 @@ system.runInterval(() => {
         if (isRiding && !ridingPlayers.has(player.id)) {
             const target = player.getComponent("riding").entityRidingOn;
             /** @type {PlayerRideAfterEvent} */
-            let event = {
+            let events = {
                 player,
                 entity: target
             };
 
             ridingPlayers.set(player.id, true);
 
-            callbacks.forEach((_, callback) => callback(event));
+            callbacks.forEach((_, callback) => callback(events));
         } else if (!isRiding) {
             ridingPlayers.delete(player.id);
         }

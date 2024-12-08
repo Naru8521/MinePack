@@ -8,6 +8,8 @@
 6. [playerGetOffAfterEvent](#anchor6)
 7. [playerXpChangeAfterEvent](#anchor7)
 8. [tagChangeAfterEvent](#anchor8)
+9. [playerUseChestBeforeEvent](#anchor9)
+10. [playerUseChestAfterEvent](#anchor10)
 
 <a id="anchor1"></a>
 
@@ -164,5 +166,33 @@ tagChangeAfterEvent.subscribe(ev => {
     entity.sendMessage(`tag - ${tags}`);
     entity.sendMessage(`add - ${addTags}`);
     entity.sendMessage(`remove - ${removeTags}`);
+});
+```
+
+<a id="anchor9"></a>
+
+# 9. playerUseChestBeforeEvent
+
+プレイヤーがチェストを使用した時に呼び出されます
+
+```javascript
+playerUseChestBeforeEvent.subscribe(ev => {
+    const { player, interactBlock, isLarge, chestPair } = ev;
+
+    if (isLarge) {
+        ev.cancel = true;
+    }
+});
+```
+
+<a id="anchor10"></a>
+
+# 10. playerUseChestAfterEvent
+
+プレイヤーがチェストを使用した時に呼び出されます
+
+```javascript
+playerUseChestAfterEvent.subscribe(ev => {
+    const { player, interactBlock, isLarge, chestPair } = ev;
 });
 ```

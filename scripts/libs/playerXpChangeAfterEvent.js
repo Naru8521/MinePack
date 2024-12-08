@@ -53,12 +53,12 @@ system.runInterval(() => {
             player.setDynamicProperty("totalXp", totalXp);
 
             /** @type {PlayerXpChangeAfterEvent} */
-            let event = {
+            let events = {
                 player,
                 xp: totalXp - dyTotalXp
             };
 
-            callbacks.forEach((_, callback) => callback(event));
+            callbacks.forEach((_, callback) => callback(events));
         }
     }
 });

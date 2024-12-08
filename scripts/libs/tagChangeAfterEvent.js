@@ -59,14 +59,14 @@ system.runInterval(() => {
 
                 if (addTags.length > 0 || removeTags.length > 0) {
                     /** @type {TagChangeAfterEvent} */
-                    let event = {
+                    let events = {
                         entity,
                         tags,
                         addTags,
                         removeTags
                     };
 
-                    callbacks.forEach((_, callback) => callback(event));
+                    callbacks.forEach((_, callback) => callback(events));
                 }
 
                 entity.oldTags = tags;

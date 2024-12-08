@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import { CommandHandler } from "./libs/commandHandler";
+import CommandHandler from "./libs/commandHandler";
 import playerMoveBeforeEvent from "./libs/playerMoveBeforeEvent";
 import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
 import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
@@ -7,6 +7,8 @@ import playerRideAfterEvent from "./libs/playerRideAfterEvent";
 import playerGetOffAfterEvent from "./libs/playerGetOffAfterEvent";
 import playerXpChangeAfterEvent from "./libs/playerXpChangeAfterEvent";
 import tagChangeAfterEvent from "./libs/tagChangeAfterEvent";
+import playerUseChestBeforeEvent from "./libs/playerUseChestBeforeEvent";
+import playerUseChestAfterEvent from "./libs/playerUseChestAfterEvent";
 
 commandHandler: {
     // commandsへのpath
@@ -14,7 +16,7 @@ commandHandler: {
 
     /** @type {import("./libs/commandHandler").CommandSetting} */
     const commandSetting = {
-        prefix: "!",
+        prefix: "",
         id: "a:b"
     };
     
@@ -97,5 +99,21 @@ tagChangeAfterEvent: {
         entity.sendMessage(`tag - ${tags}`);
         entity.sendMessage(`add - ${addTags}`);
         entity.sendMessage(`remove - ${removeTags}`);
+    });
+}
+
+playerUsechestBeforeEvent: {
+    playerUseChestBeforeEvent.subscribe(ev => {
+        const { player, interactBlock, isLarge, chestPair } = ev;
+
+        if (isLarge) {
+            ev.cancel = true;
+        }
+    });
+}
+
+playerUseChestAfterEvent: {
+    playerUseChestAfterEvent.subscribe(ev => {
+        const { player, interactBlock, isLarge, chestPair } = ev;
     });
 }

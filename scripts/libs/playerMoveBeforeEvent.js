@@ -75,15 +75,15 @@ system.runInterval(() => {
 
             if (pressedKeys.length > 0) {
                 /** @type {playerMoveBeforeEvent} */
-                let event = {
+                let events = {
                     player: player,
                     keys: pressedKeys,
                     cancel: false
                 }
 
-                callbacks.forEach((_, callback) => callback(event));
+                callbacks.forEach((_, callback) => callback(events));
 
-                if (event.cancel) {
+                if (events.cancel) {
                     player.teleport(previousLocation);
                     continue;
                 }

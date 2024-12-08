@@ -52,13 +52,13 @@ system.runInterval(() => {
             const target = ridingPlayers.get(player.id);
 
             /** @type {PlayerGetOffAfterEvent} */
-            let event = {
+            let events = {
                 player,
                 entity: target
             };
             
             ridingPlayers.delete(player.id);
-            callbacks.forEach((_, callback) => callback(event));
+            callbacks.forEach((_, callback) => callback(events));
         }
     }
 });

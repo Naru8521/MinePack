@@ -60,7 +60,7 @@ world.beforeEvents.entityRemove.subscribe(ev => {
     const { removedEntity } = ev;
 
     /** @type {PlayerFishingAfterEvent} */
-    let event = {
+    let events = {
         result: false,
         player: null,
         itemEntity: undefined,
@@ -81,21 +81,21 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         // プレイヤーをセット
         for (const id of ids) {
             if (fishingEntityIds.get(id) === removedEntity.id) {
-                event.player = getPlayerFromId(id);
+                events.player = getPlayerFromId(id);
                 fishingEntityIds.delete(id);
             }
         }
 
         // アイテムとリザルトをセット
         if (item) {
-            event.result = true;
-            event.itemEntity = item;
-            event.itemStack = item.getComponent("item").itemStack;
+            events.result = true;
+            events.itemEntity = item;
+            events.itemStack = item.getComponent("item").itemStack;
         } else {
-            event.result = false;
+            events.result = false;
         }
 
-        callbacks.forEach((_, callback) => callback(event));
+        callbacks.forEach((_, callback) => callback(events));
     }
 });
 

@@ -1,4 +1,4 @@
-import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent, world } from "@minecraft/server";
+import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
 
 /**
  * @typedef {Object} CommandSetting
@@ -26,7 +26,6 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
 
 /**
  * @typedef {Object} CommandReturn
- * @property {boolean} isPrefixId
  * @property {boolean} result
  * @property {string?} name
  * @property {string[]} splitMessage
@@ -42,7 +41,7 @@ import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEven
 /** @type {Map<string, WrapCommand>} */
 const wrapCommands = new Map();
 
-export class CommandHandler {
+export default class CommandHandler {
     /**
      * コマンドの設定をします
      * @param {string} commandsPath - commandsフォルダーへのパス (commandHandler.jsから)
@@ -62,19 +61,18 @@ export class CommandHandler {
                 commands: this.commands
             });
 
-            const commands = this.getAllSubCommands(this.commands);
-
             (async () => {
-                for (const command of commands) {
+                for (const command of this.commands) {
+                    const name = command.name;
+
                     try {
-                        await import(`${this.commandsPath}/${command}`);
+                        await import(`${this.commandsPath}/${name}`);
 
                         if (log) {
-                            console.warn(`${command}がコマンドとして登録されました`);
+                            console.warn(`${name}がコマンドとして登録されました`);
                         }
                     } catch (e) {
-                        console.error(e);
-                        console.error(`${command}は${this.commandsPath}内にないため処理されません`);
+                        console.error(`${name}は${this.commandsPath}内にないため処理されません`);
                     }
                 }
             })();
@@ -97,9 +95,9 @@ export class CommandHandler {
             entity = ev.sourceEntity;
         } else return;
 
-        const { isPrefixId, result, name, splitMessage } = this.command(message, entity);
+        const { result, name, splitMessage } = this.command(message, entity);
 
-        if (isPrefixId || result || name) {
+        if (result || name) {
             if (ev instanceof ChatSendBeforeEvent) {
                 ev.cancel = true;
             }
@@ -138,23 +136,23 @@ export class CommandHandler {
             message = message.replace(prefix, "").trim();
             message = message.replace(id, "").trim();
         } else {
-            return { isPrefixId: false, result: false, name: null, splitMessage: [] };
+            return { result: false, name: null, splitMessage: [] };
         }
 
         const splitMessage = message.split(" ");
         const { result, name, remainingMessage } = this.match(this.commands, splitMessage, entity);
 
         if (result && name) {
-            return { isPrefixId: true, result: true, name: name, splitMessage: remainingMessage };
+            return { result: true, name: splitMessage[0], splitMessage: remainingMessage };
         } else if (!result && name) {
-            return { isPrefixId: true, result: false, name: name, splitMessage: remainingMessage };
+            return { result: false, name: splitMessage[0], splitMessage: remainingMessage };
         } else if (prefix === "") {
-            return { isPrefixId: true, result: false, name: null, splitMessage: [] };
+            return { result: false, name: null, splitMessage: [] };
         } else if (id === "") {
-            return { isPrefixId: true, result: false, name: null, splitMessage: [] };
+            return { result: false, name: null, splitMessage: [] };
         }
 
-        return { isPrefixId: true, result: true, name: null, splitMessage };
+        return { result: true, name: null, splitMessage };
     }
 
     /**
@@ -186,10 +184,9 @@ export class CommandHandler {
                 if (hasRequiredTags) {
                     if (command.subCommands) {
                         const matchResult = this.match(command.subCommands, remainingMessage, entity);
-
                         return {
                             result: matchResult.result,
-                            name: matchResult.name,
+                            name: splitMessage[0],
                             remainingMessage: matchResult.remainingMessage
                         };
                     }
@@ -214,25 +211,6 @@ export class CommandHandler {
             name: null,
             remainingMessage: splitMessage
         };
-    }
-
-    /**
-     * 最下層のコマンド名を取得します
-     * @param {SubCommand[]} commands - コマンドのリスト
-     * @returns {string[]} - 最下層のコマンド名のリスト
-     */
-    getAllSubCommands(commands) {
-        const bottomCommands = [];
-
-        for (const command of commands) {
-            if (command.subCommands && command.subCommands.length > 0) {
-                bottomCommands.push(...this.getAllSubCommands(command.subCommands));
-            } else {
-                bottomCommands.push(command.name);
-            }
-        }
-
-        return bottomCommands;
     }
 }
 
