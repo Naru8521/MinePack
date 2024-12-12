@@ -1,4 +1,4 @@
-import { ChatSendAfterEvent, ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent, system, world } from "@minecraft/server";
+import { ChatSendAfterEvent, ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
 
 /**
  * @typedef {string} CommandsPath 
