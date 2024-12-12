@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import CommandHandler from "./libs/commandHandler";
 import playerMoveBeforeEvent from "./libs/playerMoveBeforeEvent";
 import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
@@ -23,15 +23,34 @@ commandHandler: {
     /** @type {import("./libs/commandHandler").SubCommand[]} */
     const commands = [
         {
-            name: "test1",
-            description: "test1"
+            name: "test1"
+        },
+        {
+            name: "test2",
+            subCommands: [
+                {
+                    name: "a"
+                }
+            ]
         }
     ];
     
     const commandHandler = new CommandHandler(commandsPath, commandSetting, commands);
     
     world.beforeEvents.chatSend.subscribe(ev => {
-        commandHandler.check(ev);
+        if (commandHandler.isCommand(ev)) {
+            world.sendMessage("これはコマンドです。");
+        }
+
+        commandHandler.handleCommand(ev);
+    });
+
+    system.afterEvents.scriptEventReceive.subscribe(ev => {
+        if (commandHandler.isCommand(ev)) {
+            world.sendMessage("これはコマンドです。");
+        }
+        
+        commandHandler.handleCommand(ev);
     });
 }
 

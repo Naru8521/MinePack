@@ -19,7 +19,7 @@
 
 ```javascript
 const commandSetting = {
-    prefix: "",
+    prefix: "!",
     id: "a:b"
 };
 ```
@@ -29,17 +29,13 @@ const commandSetting = {
 ```javascript
 const commands = [
     {
-        name: "test1",
-        description: "test1"
+        name: "test1"
     },
     {
         name: "test2",
-        description: "test2",
-        tags: ["op"],
         subCommands: [
             {
-                name: "test3",
-                description: "test3"
+                name: "a"
             }
         ]
     }
@@ -56,7 +52,19 @@ const commandHandler = new CommandHandler(commandsPath, commandSetting, commands
 
 ```javascript
 world.beforeEvents.chatSend.subscribe(ev => {
-    commandHandler.check(ev);
+    if (commandHandler.isCommand(ev)) {
+        world.sendMessage("これはコマンドです。");
+    }
+
+    commandHandler.handleCommand(ev);
+});
+
+system.afterEvents.scriptEventReceive.subscribe(ev => {
+    if (commandHandler.isCommand(ev)) {
+        world.sendMessage("これはコマンドです。");
+    }
+        
+    commandHandler.handleCommand(ev);
 });
 ```
 

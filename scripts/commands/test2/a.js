@@ -7,5 +7,5 @@ import { Block, Entity, Player } from "@minecraft/server";
 export function run(args, ev) {
     const { player, entity, initiator, block } = ev;
 
-    world.sendMessage("test1を実行しました");
+    world.sendMessage("test2 aを実行しました");
 }
