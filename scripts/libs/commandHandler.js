@@ -1,6 +1,10 @@
 import { ChatSendBeforeEvent, Entity, Player, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
 
 /**
+ * @typedef {string} CommandsPath 
+ */
+
+/**
  * @typedef {Object} CommandSetting
  * @property {string} prefix
  * @property {string} id
