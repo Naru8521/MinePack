@@ -6,8 +6,8 @@ import { ChatSendAfterEvent, ChatSendBeforeEvent, ScriptEventCommandMessageAfter
 
 /**
  * @typedef {Object} CommandSetting
- * @property {string[]} prefix
- * @property {string[]} id
+ * @property {string[]} prefixs
+ * @property {string[]} ids
  */
 
 /**
@@ -111,32 +111,36 @@ function getCommandDetails(commandsPath, commandSetting, commands, ev) {
     if (ev instanceof ChatSendBeforeEvent || ev instanceof ChatSendAfterEvent) {
         let { message } = ev;
 
-        if (message.startsWith(commandSetting.prefix)) {
-            message = message.replace(commandSetting.prefix, "").trim();
+        for (const prefix of commandSetting.prefixs) {
+            if (message.startsWith(prefix)) {
+                message = message.replace(prefix, "").trim();
 
-            const parts = message.split(" ");
-
-            for (let i = 0; i < commandPaths.length; i++) {
-                const commandParts = commandStrings[i].split(" ");
-
-                if (parts.length >= commandParts.length && parts.slice(0, commandParts.length).every((part, index) => part === commandParts[index])) {
-                    const remaining = parts.slice(commandParts.length);
-
-                    return { path: commandPaths[i], remaining };
-                }
-            }
-        } else {
-            const { id, message } = ev;
-
-            if (id === commandSetting.id) {
                 const parts = message.split(" ");
 
                 for (let i = 0; i < commandPaths.length; i++) {
                     const commandParts = commandStrings[i].split(" ");
-    
+
                     if (parts.length >= commandParts.length && parts.slice(0, commandParts.length).every((part, index) => part === commandParts[index])) {
                         const remaining = parts.slice(commandParts.length);
-                        
+
+                        return { path: commandPaths[i], remaining };
+                    }
+                }
+            }
+        }
+    } else {
+        const { id, message } = ev;
+
+        for (const ida of commandSetting.ids) {
+            if (id === ida) {
+                const parts = message.split(" ");
+
+                for (let i = 0; i < commandPaths.length; i++) {
+                    const commandParts = commandStrings[i].split(" ");
+
+                    if (parts.length >= commandParts.length && parts.slice(0, commandParts.length).every((part, index) => part === commandParts[index])) {
+                        const remaining = parts.slice(commandParts.length);
+
                         return { path: commandPaths[i], remaining };
                     }
                 }
