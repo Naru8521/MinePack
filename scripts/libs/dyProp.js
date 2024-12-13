@@ -95,6 +95,24 @@ export default class DyProp {
     }
 
     /**
+     * 指定されたkeyの永続的配列データをすべて削除します。
+     * @param {string} key 
+     */
+    whileDeleteArray(key) {
+        validateKey(key);
+
+        let i = 0;
+
+        while (true) {
+            const newKey = `${key}_${i}`;
+
+            if (this.hasKey(newKey)) {
+                this.set(newKey, undefined);
+            } else break;
+        }
+    }
+
+    /**
      * 指定されたkeyのデータに永続的に配列データをセットします。
      * @param {string} key - DynamicPropertyのkey
      * @param {Array<any>} value - セットする配列データ
