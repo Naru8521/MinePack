@@ -1,4 +1,4 @@
-import { World, Entity, Player, ItemStack } from "@minecraft/server";
+import { World, Entity, Player, ItemStack, world } from "@minecraft/server";
 
 export default class DyProp {
     /**
@@ -98,7 +98,7 @@ export default class DyProp {
      * 指定されたkeyの永続的配列データをすべて削除します。
      * @param {string} key 
      */
-    whileDeleteArray(key) {
+    whileRemoveArray(key) {
         validateKey(key);
 
         let i = 0;
@@ -107,7 +107,7 @@ export default class DyProp {
             const newKey = `${key}_${i}`;
 
             if (this.hasKey(newKey)) {
-                this.set(newKey, undefined);
+                this.remove(newKey);
                 i++;
             } else break;
         }
