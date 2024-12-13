@@ -108,6 +108,7 @@ export default class DyProp {
 
             if (this.hasKey(newKey)) {
                 this.set(newKey, undefined);
+                i++;
             } else break;
         }
     }
