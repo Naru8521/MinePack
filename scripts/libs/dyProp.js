@@ -113,12 +113,8 @@ export default class DyProp {
         while (i < splitValues.length) {
             const newKey = `${key}_${i}`;
 
-            if (!this.hasKey(newKey)) {
-                this.set(newKey, splitValues[i]);
-                i++;
-            } else {
-                i++;
-            }
+            this.set(newKey, splitValues[i]);
+            i++;
         }
     }
 
@@ -138,6 +134,7 @@ export default class DyProp {
 
             if (this.hasKey(newKey)) {
                 result.push(this.get(newKey));
+                i++;
             } else {
                 break;
             }
@@ -162,6 +159,7 @@ export default class DyProp {
 
             if (this.hasKey(newKey)) {
                 result.push(newKey);
+                i++;
             } else {
                 break;
             }
