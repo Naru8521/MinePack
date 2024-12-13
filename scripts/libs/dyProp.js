@@ -16,7 +16,7 @@ export default class DyProp {
      */
     set(key, value) {
         try {
-            this.validateKey(key);
+            validateKey(key);
 
             if (value === undefined) {
                 throw new Error("valueはstring | number | boolean | Array | object型のどれかである必要があります。");
@@ -39,7 +39,7 @@ export default class DyProp {
      * @returns {string | number | boolean | Array<any> | object | undefined} データ
      */
     get(key) {
-        this.validateKey(key);
+        validateKey(key);
 
         let data = this.target.getDynamicProperty(key);
 
@@ -57,7 +57,7 @@ export default class DyProp {
      * @param {string} key - DynamicPropertyのkey
      */
     remove(key) {
-        this.validateKey(key);
+        validateKey(key);
         this.target.setDynamicProperty(key, undefined);
     }
 
@@ -90,7 +90,7 @@ export default class DyProp {
      * @returns {boolean} 存在する場合はtrue、そうでない場合はfalse
      */
     hasKey(key) {
-        this.validateKey(key);
+        validateKey(key);
         return this.getAllKeys().includes(key);
     }
 
@@ -100,13 +100,13 @@ export default class DyProp {
      * @param {Array<any>} value - セットする配列データ
      */
     whileSetArray(key, value) {
-        this.validateKey(key);
+        validateKey(key);
 
         if (!Array.isArray(value)) {
             throw new Error("valueはArray型である必要があります");
         }
 
-        const splitValues = this.splitArrayByByteSize(value);
+        const splitValues = splitArrayByByteSize(value);
 
         let i = 0;
 
@@ -128,7 +128,7 @@ export default class DyProp {
      * @returns {Array<any>} データ配列
      */
     whileGetArray(key) {
-        this.validateKey(key);
+        validateKey(key);
 
         let result = [];
         let i = 0;
@@ -147,76 +147,100 @@ export default class DyProp {
     }
 
     /**
-     * keyの形式を検証します。
+     * 指定されたKeyのDynamicPropertyの名前を全て返します。
      * @param {string} key - DynamicPropertyのkey
+     * @returns {Array<string>} ID配列
      */
-    validateKey(key) {
-        if (typeof key !== "string") {
-            throw new Error("keyはstring型である必要があります。");
-        }
-    }
+    whileGetIds(key) {
+        validateKey(key);
 
-    /**
-     * 文字列のバイトサイズを取得します。
-     * @param {string} str - 文字列
-     * @returns {number} バイトサイズ
-     */
-    getByteSize(str) {
-        let byteSize = 0;
-        for (let i = 0; i < str.length; i++) {
-            const charCode = str.charCodeAt(i);
-            if (charCode <= 0x7F) {
-                byteSize += 1;
-            } else if (charCode <= 0x7FF) {
-                byteSize += 2;
-            } else if (charCode <= 0xFFFF) {
-                byteSize += 3;
+        let result = [];
+        let i = 0;
+
+        while (true) {
+            const newKey = `${key}_${i}`;
+
+            if (this.hasKey(newKey)) {
+                result.push(newKey);
             } else {
-                byteSize += 4;
+                break;
             }
-        }
-        return byteSize;
-    }
-
-    /**
-     * 配列をバイトサイズごとに分割します。
-     * @param {Array<any>} value - 配列
-     * @param {number} [maxBytes=32767] - 最大バイトサイズ
-     * @returns {Array<Array<any>>} 分割された配列
-     */
-    splitArrayByByteSize(value, maxBytes = 32767) {
-        const result = [];
-        let currentChunk = [];
-        let currentSize = 0;
-
-        for (const item of value) {
-            let itemSize;
-            let itemData;
-
-            if (typeof item === "string") {
-                itemData = item;
-            } else if (typeof item === "number" || typeof item === "boolean") {
-                itemData = String(item);
-            } else {
-                itemData = JSON.stringify(item);
-            }
-
-            itemSize = this.getByteSize(itemData);
-
-            if (currentSize + itemSize > maxBytes) {
-                result.push(currentChunk);
-                currentChunk = [];
-                currentSize = 0;
-            }
-
-            currentChunk.push(item);
-            currentSize += itemSize;
-        }
-
-        if (currentChunk.length > 0) {
-            result.push(currentChunk);
         }
 
         return result;
     }
+}
+
+/**
+ * keyの形式を検証します。
+ * @param {string} key - DynamicPropertyのkey
+ */
+function validateKey(key) {
+    if (typeof key !== "string") {
+        throw new Error("keyはstring型である必要があります。");
+    }
+}
+
+/**
+ * 文字列のバイトサイズを取得します。
+ * @param {string} str - 文字列
+ * @returns {number} バイトサイズ
+ */
+function getByteSize(str) {
+    let byteSize = 0;
+    for (let i = 0; i < str.length; i++) {
+        const charCode = str.charCodeAt(i);
+        if (charCode <= 0x7F) {
+            byteSize += 1;
+        } else if (charCode <= 0x7FF) {
+            byteSize += 2;
+        } else if (charCode <= 0xFFFF) {
+            byteSize += 3;
+        } else {
+            byteSize += 4;
+        }
+    }
+    return byteSize;
+}
+
+/**
+ * 配列をバイトサイズごとに分割します。
+ * @param {Array<any>} value - 配列
+ * @param {number} [maxBytes=32767] - 最大バイトサイズ
+ * @returns {Array<Array<any>>} 分割された配列
+ */
+function splitArrayByByteSize(value, maxBytes = 32767) {
+    const result = [];
+    let currentChunk = [];
+    let currentSize = 0;
+
+    for (const item of value) {
+        let itemSize;
+        let itemData;
+
+        if (typeof item === "string") {
+            itemData = item;
+        } else if (typeof item === "number" || typeof item === "boolean") {
+            itemData = String(item);
+        } else {
+            itemData = JSON.stringify(item);
+        }
+
+        itemSize = getByteSize(itemData);
+
+        if (currentSize + itemSize > maxBytes) {
+            result.push(currentChunk);
+            currentChunk = [];
+            currentSize = 0;
+        }
+
+        currentChunk.push(item);
+        currentSize += itemSize;
+    }
+
+    if (currentChunk.length > 0) {
+        result.push(currentChunk);
+    }
+
+    return result;
 }
