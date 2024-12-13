@@ -19,8 +19,8 @@
 
 ```javascript
 const commandSetting = {
-    prefix: "!",
-    id: "a:b"
+    prefixs: ["!"],
+    ids: ["a:b"]
 };
 ```
 
