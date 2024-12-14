@@ -51,7 +51,7 @@ export default class CommandHandler {
                         console.log(`${strings[i]} がコマンドとして登録されました。`);
                     }
                 } catch (e) {
-                    console.error(`${strings[i]} は ${this.commandsPath} 内にないため処理されません。`);
+                    console.error(e);
                 }
             }
         })();
@@ -90,7 +90,7 @@ export default class CommandHandler {
                         module.run(remaining, { entity: ev.sourceEntity, initiator: ev.initiator, block: ev.sourceBlock });
                     }
                 } catch (e) {
-
+                    console.error(e);
                 }
             })();
         }
