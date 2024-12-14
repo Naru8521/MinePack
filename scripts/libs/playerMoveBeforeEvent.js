@@ -1,4 +1,4 @@
-import { system, world, Player } from "@minecraft/server";
+import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, system, world } from "@minecraft/server";
 
 /**
  * @callback PlayerMoveBeforeEventCallback
@@ -6,14 +6,47 @@ import { system, world, Player } from "@minecraft/server";
  */
 
 /**
+ * @typedef {Object} PlayerInputKeys 
+ * @property {"W"} W
+ * @property {"A"} A 
+ * @property {"S"} S 
+ * @property {"D"} D 
+ * @property {"SPACE"} SPACE
+ * @property {"SHIFT"} SHIFT 
+ */
+
+/**
+ * @typedef {"W" | "A" | "S" | "D" | "SPACE" | "SHIFT"} PlayerInputKey
+ */
+
+/**
  * @typedef {Object} PlayerMoveBeforeEvent
  * @property {Player} player - イベントを起こしたプレイヤー
- * @property {("W" | "A" | "S" | "D")[]} keys 
+ * @property {PlayerInputKey[]} keys - 押されているキー
+ * @property {InputMode} device - イベントを起こしたプレイヤーのデバイス
+ * @property {boolean} cancel - イベントをキャンセルするかどうか
+ */
+
+/**
+ * @typedef {Object} PlayerMoveBeforeEvent
+ * @property {Player} player - イベントを起こしたプレイヤー
+ * @property {[]} keys - 押されているキー
+ * @property {InputMode} inputMode - イベントを起こしたプレイヤーのモード
  * @property {boolean} cancel - イベントをキャンセルするかどうか
  */
 
 const callbacks = new Map();
-const previousPositions = new Map();
+const playerLocationsMap = new Map();
+
+/** @type {Readonly<PlayerInputKeys>} */
+export const PlayerInputKeys = Object.freeze({
+    W: "W",
+    A: "A",
+    S: "S",
+    D: "D",
+    SPACE: "SPACE",
+    SHIFT: "SHIFT"
+});
 
 export default class playerMoveBeforeEvent {
     /**
@@ -43,53 +76,46 @@ system.runInterval(() => {
     const players = world.getAllPlayers();
 
     for (const player of players) {
-        const playerId = player.id;
-        const currentLocation = player.location;
-        const viewDirection = player.getViewDirection();
-        const previousLocation = previousPositions.get(playerId) || currentLocation;
-        const deltaX = currentLocation.x - previousLocation.x;
-        const deltaZ = currentLocation.z - previousLocation.z;
-        const movementThreshold = 0.01;
+        const inputInfo = player.inputInfo;
+        const pressedKeys = getPressedKeys(inputInfo);
+        const location = player.location;
+        const playerLocation = playerLocationsMap.get(player.id) || location;
 
-        if (Math.abs(deltaX) > movementThreshold || Math.abs(deltaZ) > movementThreshold) {
-            const forwardX = viewDirection.x;
-            const forwardZ = viewDirection.z;
-            const rightX = -forwardZ;
-            const rightZ = forwardX;
-            const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-            const forwardMovement = (deltaX * forwardX + deltaZ * forwardZ) / movementMagnitude;
-            const rightMovement = (deltaX * rightX + deltaZ * rightZ) / movementMagnitude;
-            const pressedKeys = [];
+        if (pressedKeys.length > 0) {
+            /** @type {PlayerMoveBeforeEvent} */
+            let events = {
+                player: player,
+                keys: pressedKeys,
+                device: inputInfo.lastInputModeUsed,
+                cancel: false
+            };
 
-            if (forwardMovement > 0.1) {
-                pressedKeys.push("W");
-            } else if (forwardMovement < -0.1) {
-                pressedKeys.push("S");
-            }
+            callbacks.forEach((_, callback) => callback(events));
 
-            if (rightMovement > 0.1) {
-                pressedKeys.push("D");
-            } else if (rightMovement < -0.1) {
-                pressedKeys.push("A");
-            }
-
-            if (pressedKeys.length > 0) {
-                /** @type {playerMoveBeforeEvent} */
-                let events = {
-                    player: player,
-                    keys: pressedKeys,
-                    cancel: false
-                }
-
-                callbacks.forEach((_, callback) => callback(events));
-
-                if (events.cancel) {
-                    player.teleport(previousLocation);
-                    continue;
-                }
+            if (events.cancel) {
+                player.teleport(playerLocation);
+                continue;
             }
         }
 
-        previousPositions.set(playerId, currentLocation);
+        playerLocationsMap.set(player.id, location);
     }
 });
+
+/**
+ * @param {InputInfo} inputInfo 
+ * @returns {PlayerInputKey[]}
+ */
+function getPressedKeys(inputInfo) {
+    const { x, y } = inputInfo.getMovementVector();
+    let pressedKeys = [];
+
+    if (y > 0) pressedKeys.push("W");
+    if (y < 0) pressedKeys.push("S");
+    if (x > 0) pressedKeys.push("A");
+    if (x < 0) pressedKeys.push("D");
+    if (inputInfo.getButtonState(InputButton.Jump) === ButtonState.Pressed) pressedKeys.push("SPACE");
+    if (inputInfo.getButtonState(InputButton.Sneak) === ButtonState.Pressed) pressedKeys.push("SHIFT");
+
+    return pressedKeys;
+}

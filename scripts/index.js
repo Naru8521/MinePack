@@ -68,7 +68,7 @@ playerDropBeforeEvent: {
 
 playerMoveBeforeEvent: {
     playerMoveBeforeEvent.subscribe(ev => {
-        const { player, keys } = ev;
+        const { player, keys, device } = ev;
     
         player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
     
