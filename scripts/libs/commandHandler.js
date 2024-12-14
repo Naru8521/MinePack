@@ -1,4 +1,4 @@
-import { ChatSendAfterEvent, ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
+import { ChatSendAfterEvent, ChatSendBeforeEvent, Player, ScriptEventCommandMessageAfterEvent } from "@minecraft/server";
 
 /**
  * @typedef {string} CommandsPath 
@@ -87,7 +87,7 @@ export default class CommandHandler {
                     if (ev instanceof ChatSendBeforeEvent | ChatSendAfterEvent) {
                         module.run(remaining, { player: ev.sender });
                     } else {
-                        module.run(remaining, { entity: ev.sourceEntity, initiator: ev.initiator, block: ev.sourceBlock });
+                        module.run(remaining, { player: ev.sourceEntity instanceof Player ? ev.sourceEntity : undefined, entity: ev.sourceEntity, initiator: ev.initiator, block: ev.sourceBlock });
                     }
                 } catch (e) {
                     console.error(e);
