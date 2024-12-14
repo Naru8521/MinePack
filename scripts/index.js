@@ -11,7 +11,7 @@ import playerUseChestBeforeEvent from "./libs/playerUseChestBeforeEvent";
 import playerUseChestAfterEvent from "./libs/playerUseChestAfterEvent";
 
 commandHandler: {
-    // commandsへのpath
+    /** @type {import("./libs/commandHandler").CommandsPath} */
     const commandsPath = "../commands";
 
     /** @type {import("./libs/commandHandler").CommandSetting} */
