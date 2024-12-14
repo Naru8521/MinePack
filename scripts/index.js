@@ -16,8 +16,8 @@ commandHandler: {
 
     /** @type {import("./libs/commandHandler").CommandSetting} */
     const commandSetting = {
-        prefix: "",
-        id: "a:b"
+        prefix: [""],
+        id: ["a:b"]
     };
     
     /** @type {import("./libs/commandHandler").SubCommand[]} */
