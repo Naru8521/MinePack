@@ -109,7 +109,7 @@ function getCommandDetails(commandsPath, commandSetting, commands, ev) {
     const commandStrings = getCommandStrings(commands);
 
     if (ev instanceof ChatSendBeforeEvent || ev instanceof ChatSendAfterEvent) {
-        let { message } = ev;
+        let { message, sender } = ev;
 
         for (const prefix of commandSetting.prefixs) {
             if (message.startsWith(prefix)) {
@@ -119,6 +119,10 @@ function getCommandDetails(commandsPath, commandSetting, commands, ev) {
 
                 for (let i = 0; i < commandPaths.length; i++) {
                     const commandParts = commandStrings[i].split(" ");
+
+                    if (commands[i].tags.length > 0 && !sender.getTags().some(commands[i].tags)) {
+                        return undefined;
+                    }
 
                     if (parts.length >= commandParts.length && parts.slice(0, commandParts.length).every((part, index) => part === commandParts[index])) {
                         const remaining = parts.slice(commandParts.length);
