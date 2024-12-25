@@ -8,13 +8,19 @@ import { world, system, Player, ItemStack, Entity } from "@minecraft/server";
 /**
  * @typedef {Object} PlayerFishingAfterEvent
  * @property {boolean} result - 釣りに成功したかどうか
- * @property {Player} player - イベントを起こしたプレイヤー
+ * @property {Player | undefined} player - イベントを起こしたプレイヤー
  * @property {Entity | undefined} itemEntity - 釣れたアイテムのエンティティ
  * @property {ItemStack | undefined} itemStack - 釣れたアイテム
  */
 
-const callbacks = new Map();
+/** @type {Player[]} */
+const fishingPlayerQueue = [];
+
+/** @type {Map<string, string>} */
 const fishingEntityIds = new Map();
+
+/** @type {Map<PlayerFishingAfterEventCallback, boolean>} */
+const callbacks = new Map();
 
 export default class playerFishingAfterEvent {
     /**
@@ -40,32 +46,33 @@ export default class playerFishingAfterEvent {
     }
 }
 
-world.afterEvents.projectileHitBlock.subscribe(ev => {
-    const { projectile, source } = ev;
+world.beforeEvents.itemUse.subscribe(ev => {
+    const { source, itemStack } = ev;
 
-    console.warn("TEST1");
-
-    if (source && projectile.typeId === "minecraft:fishing_hook") {
-        if (!fishingEntityIds.has(source.id)) {
-            fishingEntityIds.set(source.id, projectile.id);
+    if (itemStack.typeId === "minecraft:fishing_rod") {
+        if (!fishingEntityIds.has(source.id) && !fishingPlayerQueue.includes(source)) {
+            // キューに追加
+            fishingPlayerQueue.push(source);
         }
     }
 });
 
-world.afterEvents.projectileHitEntity.subscribe(ev => {
-    console.warn("TEST2");
+world.afterEvents.entitySpawn.subscribe(ev => {
+    const { entity } = ev;
+
+    if (entity.typeId === "minecraft:fishing_hook") {
+        const player = fishingPlayerQueue[0];
+
+        // Mapに保存
+        fishingEntityIds.set(player.id, entity.id);
+
+        // キューから削除
+        fishingPlayerQueue.splice(0, 1);
+    }
 });
 
 world.beforeEvents.entityRemove.subscribe(ev => {
     const { removedEntity } = ev;
-
-    /** @type {PlayerFishingAfterEvent} */
-    let events = {
-        result: false,
-        player: null,
-        itemEntity: undefined,
-        itemStack: undefined
-    };
 
     if (removedEntity.typeId === "minecraft:fishing_hook") {
         // アイテムを取得
@@ -76,7 +83,10 @@ world.beforeEvents.entityRemove.subscribe(ev => {
             maxDistance: 0.2
         })[0];
 
-        const ids = [...fishingEntityIds.keys()];
+        /** @type {PlayerFishingAfterEvent} */
+        let events = {};
+
+        const ids = fishingEntityIds.keys();
 
         // プレイヤーをセット
         for (const id of ids) {
@@ -86,7 +96,6 @@ world.beforeEvents.entityRemove.subscribe(ev => {
             }
         }
 
-        // アイテムとリザルトをセット
         if (item) {
             events.result = true;
             events.itemEntity = item;
@@ -101,14 +110,8 @@ world.beforeEvents.entityRemove.subscribe(ev => {
 
 /**
  * @param {string} id 
- * @returns {Player}
+ * @returns {Player | undefined}
  */
 function getPlayerFromId(id) {
-    const players = world.getAllPlayers();
-
-    for (const player of players) {
-        if (player.id === id) {
-            return player;
-        }
-    }
+    return world.getAllPlayers().filter(player => player.id === id)[0];
 }
