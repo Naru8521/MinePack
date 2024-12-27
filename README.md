@@ -2,7 +2,7 @@
 
 1. [commandHandler](#anchor1)
 2. [playerDropBeforeEvent](#anchor2)
-3. [playerMoveBeforeEvent](#anchor3)
+3. [playerMoveAfterEvent](#anchor3)
 4. [playerFishingAfterEvent](#anchor4)
 5. [playerRideAfterEvent](#anchor5)
 6. [playerGetOffAfterEvent](#anchor6)
@@ -88,17 +88,15 @@ playerDropBeforeEvent.subscribe(ev => {
 
 <a id="anchor3"></a>
 
-# 3. playerMoveBeforeEvent
+# 3. playerMoveAfterEvent
 
 プレイヤーが動いた時に呼び出されます
 
 ```javascript
-playerMoveBeforeEvent.subscribe(ev => {
-    const { player, keys, device } = ev;
+playerMoveAfterEvent.subscribe(ev => {
+    const { player, keys, device, isFirst } = ev;
 
     player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
-
-    ev.cancel = true;
 });
 ```
 

@@ -1,6 +1,6 @@
 import { system, world } from "@minecraft/server";
 import CommandHandler from "./libs/commandHandler";
-import playerMoveBeforeEvent from "./libs/playerMoveBeforeEvent";
+import playerMoveAfterEvent from "./libs/playerMoveAfterEvent";
 import playerDropBeforeEvent from "./libs/playerDropBeforeEvent";
 import playerFishingAfterEvent from "./libs/playerFishingAfterEvent";
 import playerRideAfterEvent from "./libs/playerRideAfterEvent";
@@ -9,15 +9,16 @@ import playerXpChangeAfterEvent from "./libs/playerXpChangeAfterEvent";
 import tagChangeAfterEvent from "./libs/tagChangeAfterEvent";
 import playerUseChestBeforeEvent from "./libs/playerUseChestBeforeEvent";
 import playerUseChestAfterEvent from "./libs/playerUseChestAfterEvent";
+import "./test1";
 
 commandHandler: {
-    /** @type {import("./libs/commandHandler").CommandsPath} */
+    // commandsへのpath
     const commandsPath = "../commands";
 
     /** @type {import("./libs/commandHandler").CommandSetting} */
     const commandSetting = {
-        prefix: [""],
-        id: ["a:b"]
+        prefixs: [""],
+        ids: ["a:b"]
     };
     
     /** @type {import("./libs/commandHandler").SubCommand[]} */
@@ -66,9 +67,9 @@ playerDropBeforeEvent: {
     });
 }
 
-playerMoveBeforeEvent: {
-    playerMoveBeforeEvent.subscribe(ev => {
-        const { player, keys, device } = ev;
+playerMoveAfterEvent: {
+    playerMoveAfterEvent.subscribe(ev => {
+        const { player, keys, device, isFirst } = ev;
     
         player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
     

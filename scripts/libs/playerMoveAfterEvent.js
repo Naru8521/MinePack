@@ -1,8 +1,8 @@
 import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, system, world } from "@minecraft/server";
 
 /**
- * @callback PlayerMoveBeforeEventCallback
- * @param {PlayerMoveBeforeEvent} event - イベントオブジェクト
+ * @callback PlayerMoveAfterEventCallback
+ * @param {PlayerMoveAfterEvent} event - イベントオブジェクト
  */
 
 /**
@@ -20,23 +20,15 @@ import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, syst
  */
 
 /**
- * @typedef {Object} PlayerMoveBeforeEvent
+ * @typedef {Object} PlayerMoveAfterEvent
  * @property {Player} player - イベントを起こしたプレイヤー
  * @property {PlayerInputKey[]} keys - 押されているキー
  * @property {InputMode} device - イベントを起こしたプレイヤーのデバイス
- * @property {boolean} cancel - イベントをキャンセルするかどうか
- */
-
-/**
- * @typedef {Object} PlayerMoveBeforeEvent
- * @property {Player} player - イベントを起こしたプレイヤー
- * @property {[]} keys - 押されているキー
- * @property {InputMode} inputMode - イベントを起こしたプレイヤーのモード
- * @property {boolean} cancel - イベントをキャンセルするかどうか
+ * @property {boolean} isFirst - 最初の実行か
  */
 
 const callbacks = new Map();
-const playerLocationsMap = new Map();
+const playerBeforePressKeys = new Map();
 
 /** @type {Readonly<PlayerInputKeys>} */
 export const PlayerInputKeys = Object.freeze({
@@ -48,9 +40,9 @@ export const PlayerInputKeys = Object.freeze({
     SHIFT: "SHIFT"
 });
 
-export default class playerMoveBeforeEvent {
+export default class playerMoveAfterEvent {
     /**
-     * @param {PlayerMoveBeforeEventCallback} callback 
+     * @param {PlayerMoveAfterEventCallback} callback 
      */
     constructor(callback) {
         this.callback = callback;
@@ -58,14 +50,14 @@ export default class playerMoveBeforeEvent {
     }
 
     /**
-     * @param {PlayerMoveBeforeEventCallback} callback 
+     * @param {PlayerMoveAfterEventCallback} callback 
      */
     static subscribe(callback) {
-        new playerMoveBeforeEvent(callback);
+        new playerMoveAfterEvent(callback);
     }
 
     /**
-     * @param {PlayerMoveBeforeEventCallback} callback 
+     * @param {PlayerMoveAfterEventCallback} callback 
      */
     static unsubscribe(callback) {
         callbacks.delete(callback);
@@ -78,27 +70,21 @@ system.runInterval(() => {
     for (const player of players) {
         const inputInfo = player.inputInfo;
         const pressedKeys = getPressedKeys(inputInfo);
-        const location = player.location;
-        const playerLocation = playerLocationsMap.get(player.id) || location;
 
         if (pressedKeys.length > 0) {
-            /** @type {PlayerMoveBeforeEvent} */
+            const beforePressKey = playerBeforePressKeys.get(player.id);
+            const isFirst = beforePressKey !== pressedKeys;
+
+            /** @type {PlayerMoveAfterEvent} */
             let events = {
                 player: player,
                 keys: pressedKeys,
                 device: inputInfo.lastInputModeUsed,
-                cancel: false
+                isFirst,
             };
 
             callbacks.forEach((_, callback) => callback(events));
-
-            if (events.cancel) {
-                player.teleport(playerLocation);
-                continue;
-            }
         }
-
-        playerLocationsMap.set(player.id, location);
     }
 });
 
