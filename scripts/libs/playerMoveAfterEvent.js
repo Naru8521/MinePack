@@ -73,7 +73,7 @@ system.runInterval(() => {
 
         if (pressedKeys.length > 0) {
             const beforePressKeys = playerBeforePressKeys.get(player.id) || [];
-            const isFirst = arraysAreDifferent(beforePressKeys, pressedKeys);
+            const isFirst = beforePressKeys.length === 0;
 
             /** @type {PlayerMoveAfterEvent} */
             let events = {
@@ -106,15 +106,4 @@ function getPressedKeys(inputInfo) {
     if (inputInfo.getButtonState(InputButton.Sneak) === ButtonState.Pressed) pressedKeys.push("SHIFT");
 
     return pressedKeys;
-}
-
-/**
- * @param {Array} array1 
- * @param {Array} array2 
- * @returns {boolean}
- */
-function arraysAreDifferent(array1, array2) {
-    if (array1.length !== array2.length) return true;
-
-    return array1.some((value, index) => value !== array2[index]);
 }
