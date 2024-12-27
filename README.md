@@ -94,7 +94,7 @@ playerDropBeforeEvent.subscribe(ev => {
 
 ```javascript
 playerMoveAfterEvent.subscribe(ev => {
-    const { player, keys, device, isFirst } = ev;
+    const { player, keys, device, firstKeys } = ev;
 
     player.onScreenDisplay.setActionBar(`押されたキー ${keys.join(", ")}`);
 });

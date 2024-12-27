@@ -24,7 +24,7 @@ import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, syst
  * @property {Player} player - イベントを起こしたプレイヤー
  * @property {PlayerInputKey[]} keys - 押されているキー
  * @property {InputMode} device - イベントを起こしたプレイヤーのデバイス
- * @property {boolean} isFirst - 最初の実行か
+ * @property {PlayerInputKey[]} firstKeys - 最初に実行されたキー
  */
 
 const callbacks = new Map();
@@ -73,14 +73,14 @@ system.runInterval(() => {
 
         if (pressedKeys.length > 0) {
             const beforePressKeys = playerBeforePressKeys.get(player.id) || [];
-            const isFirst = beforePressKeys.length === 0;
+            const firstKeys = pressedKeys.filter(key => !beforePressKeys.includes(key));
 
             /** @type {PlayerMoveAfterEvent} */
             let events = {
                 player: player,
                 keys: pressedKeys,
                 device: inputInfo.lastInputModeUsed,
-                isFirst,
+                firstKeys,
             };
 
             callbacks.forEach((_, callback) => callback(events));
