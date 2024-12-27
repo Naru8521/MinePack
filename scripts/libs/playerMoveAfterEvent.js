@@ -72,8 +72,8 @@ system.runInterval(() => {
         const pressedKeys = getPressedKeys(inputInfo);
 
         if (pressedKeys.length > 0) {
-            const beforePressKey = playerBeforePressKeys.get(player.id);
-            const isFirst = beforePressKey !== pressedKeys;
+            const beforePressKeys = playerBeforePressKeys.get(player.id) || [];
+            const isFirst = arraysAreDifferent(beforePressKeys, pressedKeys);
 
             /** @type {PlayerMoveAfterEvent} */
             let events = {
@@ -85,6 +85,8 @@ system.runInterval(() => {
 
             callbacks.forEach((_, callback) => callback(events));
         }
+
+        playerBeforePressKeys.set(player.id, pressedKeys);
     }
 });
 
@@ -104,4 +106,15 @@ function getPressedKeys(inputInfo) {
     if (inputInfo.getButtonState(InputButton.Sneak) === ButtonState.Pressed) pressedKeys.push("SHIFT");
 
     return pressedKeys;
+}
+
+/**
+ * @param {Array} array1 
+ * @param {Array} array2 
+ * @returns {boolean}
+ */
+function arraysAreDifferent(array1, array2) {
+    if (array1.length !== array2.length) return true;
+
+    return array1.some((value, index) => value !== array2[index]);
 }
