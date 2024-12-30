@@ -2,15 +2,15 @@ import { world, system, Player, ItemStack, Entity } from "@minecraft/server";
 
 /**
  * @callback PlayerFishingAfterEventCallback
- * @param {PlayerFishingAfterEvent} event - イベントオブジェクト
+ * @param {PlayerFishingAfterEvent} event - event object
  */
 
 /**
  * @typedef {Object} PlayerFishingAfterEvent
- * @property {boolean} result - 釣りに成功したかどうか
- * @property {Player | undefined} player - イベントを起こしたプレイヤー
- * @property {Entity | undefined} itemEntity - 釣れたアイテムのエンティティ
- * @property {ItemStack | undefined} itemStack - 釣れたアイテム
+ * @property {boolean} result - Whether the fishing was successful or not
+ * @property {Player | undefined} player - The player who caused the event
+ * @property {Entity | undefined} itemEntity - Entity of the item caught
+ * @property {ItemStack | undefined} itemStack - Fished items
  */
 
 /** @type {Player[]} */

@@ -2,13 +2,13 @@ import { world, Player, system } from "@minecraft/server";
 
 /**
  * @callback PlayerXpChangeAfterEventCallback
- * @param {PlayerXpChangeAfterEvent} event - イベントオブジェクト
+ * @param {PlayerXpChangeAfterEvent} event - event object
  */
 
 /**
  * @typedef {Object} PlayerXpChangeAfterEvent
- * @property {Player} player 
- * @property {number} xp 
+ * @property {Player} player - The player who caused the event
+ * @property {number} xp - xp amount after change
  */
 
 const callbacks = new Map();

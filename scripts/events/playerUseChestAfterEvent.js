@@ -2,22 +2,22 @@ import { Block, BlockComponentTypes, BlockVolume, BoundingBoxUtils, Container, P
 
 /**
  * @callback PlayerUseChestAfterEventCallback
- * @param {PlayerUseChestAfterEvent} event - チェストがプレイヤーによって使用されたときに発火します
+ * @param {PlayerUseChestAfterEvent} event - event object
  */
 
 /**
  * @typedef {Object} PlayerUseChestAfterEvent 
- * @property {Player} player - 使用したプレイヤー
- * @property {Block} interactBlock - 使用されたブロック
- * @property {boolean} isFirstEvent - 最初のイベントかどうか
- * @property {boolean} isLarge - ラージチェストかどうか
- * @property {ChestPair?} chestPair - isLargeがtrueの時のみ存在
+ * @property {Player} player - Players used
+ * @property {Block} interactBlock - Blocks used
+ * @property {boolean} isFirstEvent - Whether the first event
+ * @property {boolean} isLarge - Large chest or not
+ * @property {ChestPair?} chestPair - Exists only when isLarge is true
  */
 
 /**
  * @typedef {Object} ChestPair
- * @property {Block} first - 最初のブロック
- * @property {Block} second - ペアのブロック
+ * @property {Block} first - First block
+ * @property {Block} second - block of a pair
  */
 
 const callbacks = new Map();

@@ -5,7 +5,7 @@ import { ChatSendAfterEvent, ChatSendBeforeEvent, Player, ScriptEventCommandMess
  */
 
 /**
- * @typedef {Object} CommandSetting
+ * @typedef {Object} CommandSettings
  * @property {string[]} prefixs
  * @property {string[]} ids
  */
@@ -28,15 +28,14 @@ import { ChatSendAfterEvent, ChatSendBeforeEvent, Player, ScriptEventCommandMess
 export default class CommandHandler {
     /**
      * @param {CommandsPath} commandsPath 
-     * @param {CommandSetting} commandSetting 
+     * @param {CommandSettings} commandSettings 
      * @param {Commands} commands 
      * @param {boolean} log 
      */
-    constructor(commandsPath, commandSetting, commands, log = false) {
+    constructor(commandsPath, commandSettings, commands, log = false) {
         this.commandsPath = commandsPath;
-        this.commandSetting = commandSetting;
+        this.commandSettings = commandSettings;
         this.commands = commands;
-        this.log = log;
 
         const strings = getCommandStrings(this.commands);
         const paths = getCommandPaths(this.commands, this.commandsPath);
@@ -58,20 +57,20 @@ export default class CommandHandler {
     }
 
     /**
-     * コマンドかどうか
+     * Check if the command
      * @param {ChatSendBeforeEvent | ChatSendAfterEvent | ScriptEventCommandMessageAfterEvent} ev 
      */
     isCommand(ev) {
-        return getCommandDetails(this.commandsPath, this.commandSetting, this.commands, ev) ? true : false;
+        return getCommandDetails(this.commandsPath, this.commandSettings, this.commands, ev) ? true : false;
     }
 
     /**
-     * コマンドを実行
+     * Execute command
      * @param {ChatSendBeforeEvent | ChatSendAfterEvent | ScriptEventCommandMessageAfterEvent} ev 
-     * @param {boolean} cancel - ChatSendBeforeの時のみ (初期値はtrue)
+     * @param {boolean} cancel - Only when ChatSendBefore (default is true)
      */
     handleCommand(ev, cancel = true) {
-        const details = getCommandDetails(this.commandsPath, this.commandSetting, this.commands, ev);
+        const details = getCommandDetails(this.commandsPath, this.commandSettings, this.commands, ev);
 
         if (details) {
             const { path, remaining } = details;
@@ -99,21 +98,21 @@ export default class CommandHandler {
 
 /**
  * @param {CommandsPath} commandsPath
- * @param {CommandSetting} commandSetting 
+ * @param {CommandSettings} commandSettings 
  * @param {Commands} commands 
  * @param {ChatSendBeforeEvent | ChatSendAfterEvent | ScriptEventCommandMessageAfterEvent} ev 
  * @returns {{ path: string, remaining: string[] } | undefined}
  */
-function getCommandDetails(commandsPath, commandSetting, commands, ev) {
+function getCommandDetails(commandsPath, commandSettings, commands, ev) {
     const commandPaths = getCommandPaths(commands, commandsPath);
     const commandStrings = getCommandStrings(commands);
 
     if (ev instanceof ChatSendBeforeEvent || ev instanceof ChatSendAfterEvent) {
         let { message, sender } = ev;
 
-        if (!commandSetting.prefixs || commandSetting.prefixs.length === 0) return undefined;
+        if (!commandSettings.prefixs || commandSettings.prefixs.length === 0) return undefined;
 
-        for (const prefix of commandSetting.prefixs) {
+        for (const prefix of commandSettings.prefixs) {
             if (message.startsWith(prefix)) {
                 message = message.replace(prefix, "").trim();
 
@@ -154,9 +153,9 @@ function getCommandDetails(commandsPath, commandSetting, commands, ev) {
     } else {
         const { id, message } = ev;
 
-        if (!commandSetting.ids || commandSetting.ids.length === 0) return undefined;
+        if (!commandSettings.ids || commandSettings.ids.length === 0) return undefined;
 
-        for (const ida of commandSetting.ids) {
+        for (const ida of commandSettings.ids) {
             if (id === ida) {
                 const parts = message.split(" ");
 

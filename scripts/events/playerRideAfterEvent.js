@@ -1,22 +1,22 @@
 import { world, Player, Entity, system } from "@minecraft/server";
 
 /**
- * @callback PlayerGetOffAfterEventCallback
- * @param {PlayerGetOffAfterEvent} event - イベントオブジェクト
+ * @callback PlayerRideAfterEventCallback
+ * @param {PlayerRideAfterEvent} event - event object
  */
 
 /**
- * @typedef {Object} PlayerGetOffAfterEvent
- * @property {Player} player - イベントを起こしたプレイヤー
- * @property {Entity} entity - 降りたエンティティ
+ * @typedef {Object} PlayerRideAfterEvent
+ * @property {Player} player - The player who caused the event
+ * @property {Entity} entity - Entities trying to get on
  */
 
 const callbacks = new Map();
 const ridingPlayers = new Map();
 
-export default class playerGetOffAfterEvent {
+export default class playerRideAfterEvent {
     /**
-     * @param {PlayerGetOffAfterEventCallback} callback 
+     * @param {PlayerRideAfterEventCallback} callback 
      */
     constructor(callback) {
         this.callback = callback;
@@ -24,14 +24,14 @@ export default class playerGetOffAfterEvent {
     }
 
     /**
-     * @param {PlayerGetOffAfterEventCallback} callback 
+     * @param {PlayerRideAfterEventCallback} callback 
      */
     static subscribe(callback) {
-        new playerGetOffAfterEvent(callback);
+        new playerRideAfterEvent(callback);
     }
 
     /**
-     * @param {PlayerGetOffAfterEventCallback} callback 
+     * @param {PlayerRideAfterEventCallback} callback 
      */
     static unsubscribe(callback) {
         callbacks.delete(callback);
@@ -46,19 +46,17 @@ system.runInterval(() => {
 
         if (isRiding && !ridingPlayers.has(player.id)) {
             const target = player.getComponent("riding").entityRidingOn;
-
-            ridingPlayers.set(player.id, target);
-        } else if (!isRiding && ridingPlayers.has(player.id)) {
-            const target = ridingPlayers.get(player.id);
-
-            /** @type {PlayerGetOffAfterEvent} */
+            /** @type {PlayerRideAfterEvent} */
             let events = {
                 player,
                 entity: target
             };
-            
-            ridingPlayers.delete(player.id);
+
+            ridingPlayers.set(player.id, true);
+
             callbacks.forEach((_, callback) => callback(events));
+        } else if (!isRiding) {
+            ridingPlayers.delete(player.id);
         }
     }
 });

@@ -1,22 +1,22 @@
 import { world, Player, Entity, system } from "@minecraft/server";
 
 /**
- * @callback PlayerRideAfterEventCallback
- * @param {PlayerRideAfterEvent} event - イベントオブジェクト
+ * @callback PlayerGetOffAfterEventCallback
+ * @param {PlayerGetOffAfterEvent} event - event object
  */
 
 /**
- * @typedef {Object} PlayerRideAfterEvent
- * @property {Player} player - イベントを起こしたプレイヤー
- * @property {Entity} entity - 乗ろうとしているエンティティ
+ * @typedef {Object} PlayerGetOffAfterEvent
+ * @property {Player} player - The player who caused the event
+ * @property {Entity} entity - The entity that went down
  */
 
 const callbacks = new Map();
 const ridingPlayers = new Map();
 
-export default class playerRideAfterEvent {
+export default class playerGetOffAfterEvent {
     /**
-     * @param {PlayerRideAfterEventCallback} callback 
+     * @param {PlayerGetOffAfterEventCallback} callback 
      */
     constructor(callback) {
         this.callback = callback;
@@ -24,14 +24,14 @@ export default class playerRideAfterEvent {
     }
 
     /**
-     * @param {PlayerRideAfterEventCallback} callback 
+     * @param {PlayerGetOffAfterEventCallback} callback 
      */
     static subscribe(callback) {
-        new playerRideAfterEvent(callback);
+        new playerGetOffAfterEvent(callback);
     }
 
     /**
-     * @param {PlayerRideAfterEventCallback} callback 
+     * @param {PlayerGetOffAfterEventCallback} callback 
      */
     static unsubscribe(callback) {
         callbacks.delete(callback);
@@ -46,17 +46,19 @@ system.runInterval(() => {
 
         if (isRiding && !ridingPlayers.has(player.id)) {
             const target = player.getComponent("riding").entityRidingOn;
-            /** @type {PlayerRideAfterEvent} */
+
+            ridingPlayers.set(player.id, target);
+        } else if (!isRiding && ridingPlayers.has(player.id)) {
+            const target = ridingPlayers.get(player.id);
+
+            /** @type {PlayerGetOffAfterEvent} */
             let events = {
                 player,
                 entity: target
             };
-
-            ridingPlayers.set(player.id, true);
-
-            callbacks.forEach((_, callback) => callback(events));
-        } else if (!isRiding) {
+            
             ridingPlayers.delete(player.id);
+            callbacks.forEach((_, callback) => callback(events));
         }
     }
 });

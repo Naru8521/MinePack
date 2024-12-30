@@ -1,23 +1,23 @@
-import { system, world, Player, Container, ItemStack, Entity, Dimension } from "@minecraft/server";
+import { system, world, Entity } from "@minecraft/server";
 
 /**
- * @callback TagChangeAfterCallback
- * @param {TagChangeAfterEvent} event - イベントオブジェクト
+ * @callback EntityTagChangeAfterCallback
+ * @param {EntityTagChangeAfterEvent} event - event object
  */
 
 /**
- * @typedef {Object} TagChangeAfterEvent
- * @property {Entity} entity - イベントが起きたエンティティ
- * @property {string[]} tags - 現在のタグ一覧
- * @property {string[]} addTags - 追加されたタグ一覧
- * @property {string[]} removeTags - 削除されたタグ一覧
+ * @typedef {Object} EntityTagChangeAfterEvent
+ * @property {Entity} entity - Entity in which the event occurred
+ * @property {string[]} tags - Current Tag List
+ * @property {string[]} addTags - List of tags added
+ * @property {string[]} removeTags - List of deleted tags
  */
 
 const callbacks = new Map();
 
-export default class tagChangeAfterEvent {
+export default class entityTagChangeAfterEvent {
     /**
-     * @param {TagChangeAfterCallback} callback 
+     * @param {EntityTagChangeAfterCallback} callback 
      */
     constructor(callback) {
         this.callback = callback;
@@ -25,14 +25,14 @@ export default class tagChangeAfterEvent {
     }
 
     /**
-     * @param {TagChangeAfterCallback} callback 
+     * @param {EntityTagChangeAfterCallback} callback 
      */
     static subscribe(callback) {
-        new tagChangeAfterEvent(callback);
+        new entityTagChangeAfterEvent(callback);
     }
 
     /**
-     * @param {TagChangeAfterCallback} callback 
+     * @param {EntityTagChangeAfterCallback} callback 
      */
     static unsubscribe(callback) {
         callbacks.delete(callback);
@@ -58,7 +58,7 @@ system.runInterval(() => {
                 const removeTags = oldTags.filter(tag => !tags.includes(tag));
 
                 if (addTags.length > 0 || removeTags.length > 0) {
-                    /** @type {TagChangeAfterEvent} */
+                    /** @type {EntityTagChangeAfterEvent} */
                     let events = {
                         entity,
                         tags,

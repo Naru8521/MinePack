@@ -2,23 +2,23 @@ import { Block, Container, Player, world } from "@minecraft/server";
 
 /**
  * @callback PlayerUseChestBeforeEventCallback
- * @param {PlayerUseChestBeforeEvent} event - チェストがプレイヤーによって使用されたときに発火します
+ * @param {PlayerUseChestBeforeEvent} event - event object
  */
 
 /**
  * @typedef {Object} PlayerUseChestBeforeEvent 
- * @property {Player} player - 使用したプレイヤー
- * @property {Block} interactBlock - 使用されたブロック
- * @property {boolean} isFirstEvent - 最初のイベントかどうか
- * @property {boolean} isLarge - ラージチェストかどうか
- * @property {ChestPair?} chestPair - isLargeがtrueの時のみ存在
- * @property {boolean} cancel - イベントをキャンセル
+ * @property {Player} player - Players used
+ * @property {Block} interactBlock - Blocks used
+ * @property {boolean} isFirstEvent - Whether the first event
+ * @property {boolean} isLarge - Large chest or not
+ * @property {ChestPair?} chestPair - Exists only when isLarge is true
+ * @property {boolean} cancel - Cancel Event
  */
 
 /**
  * @typedef {Object} ChestPair
- * @property {Block} first - 最初のブロック
- * @property {Block} second - ペアのブロック
+ * @property {Block} first - First block
+ * @property {Block} second - block of a pair
  */
 
 const callbacks = new Map();
@@ -50,7 +50,6 @@ export default class playerUseChestBeforeEvent {
 world.beforeEvents.playerInteractWithBlock.subscribe(ev => {
     const { player, isFirstEvent, block } = ev;
     const largeChest = getLargeChest(block);
-    test(block);
 
     /** @type {PlayerUseChestBeforeEvent} */
     let events = {
@@ -68,13 +67,6 @@ world.beforeEvents.playerInteractWithBlock.subscribe(ev => {
         ev.cancel = true;
     }
 });
-
-/**
- * @param {Block} block 
- */
-function test(block) {
-    world.sendMessage(`${JSON.stringify(block.permutation.getAllStates())}`);
-}
 
 /**
  * @param {Block} block 

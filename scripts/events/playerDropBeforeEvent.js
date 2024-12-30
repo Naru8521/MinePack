@@ -1,18 +1,18 @@
-import { system, world, Player, Container, ItemStack, Entity, Dimension } from "@minecraft/server";
+import { system, world, Player, Container, ItemStack, Entity } from "@minecraft/server";
 
 /**
  * @callback PlayerDropBeforeEventCallback
- * @param {PlayerDropBeforeEvent} event - イベントオブジェクト
+ * @param {PlayerDropBeforeEvent} event - event object
  */
 
 /**
  * @typedef {Object} PlayerDropBeforeEvent
- * @property {Player} player - イベントを起こしたプレイヤー
- * @property {number} slot - イベントが起こったスロット
- * @property {Container} container - イベント後のコンテナー
- * @property {ItemStack} oldItemStack - イベントが起こる前のインベントリのアイテム
- * @property {ItemStack?} newItemStack - イベントが起こった後のインベントリのアイテム
- * @property {boolean} cancel - イベントをキャンセルするかどうか
+ * @property {Player} player - The player who caused the event
+ * @property {number} slot - Slot in which the event occurred
+ * @property {Container} container - Post-event containers
+ * @property {ItemStack} oldItemStack - Items in inventory before the event occurs
+ * @property {ItemStack?} newItemStack - Items in inventory after the event has occurred
+ * @property {boolean} cancel - Whether to cancel the event
  */
 
 const callbacks = new Map();
@@ -92,7 +92,6 @@ system.runInterval(() => {
 });
 
 /**
- * ドロップされているアイテムかを検知 (疑似)
  * @param {Player} player
  * @return {Entity?}
  */
@@ -128,7 +127,6 @@ function isDropItem(player) {
 }
 
 /**
- * 距離を計算する
  * @param {import("@minecraft/server").Vector3} vec1
  * @param {import("@minecraft/server").Vector3} vec2
  * @returns {number}
@@ -142,7 +140,6 @@ function calculateDistance(vec1, vec2) {
 }
 
 /**
- * インベントリを取得する
  * @param {Player} player 
  * @returns {Container?}
  */
@@ -157,9 +154,8 @@ function getContainer(player) {
 }
 
 /**
- * Containerをセットする
- * @param {Array} c0 - 元のコンテナー
- * @param {Container} c1 - 新しいコンテナー
+ * @param {Array} c0 
+ * @param {Container} c1 
  */
 function setContainer(c0, c1) {
     for (let slot = 0; slot < c0.length; slot++) {
@@ -170,7 +166,6 @@ function setContainer(c0, c1) {
 }
 
 /**
- * Containerのコピーを作成する
  * @param {Container} container
  * @returns {Array}
  */
@@ -185,15 +180,10 @@ function copyContainer(container) {
 }
 
 /**
- * Containerを比較する
  * @param {Player} player
  * @param {Array} c0 
  * @param {Container} c1 
- * @returns {{
- *  slot: number,
-*   oldItemStack: ItemStack,
-*   newItemStack: ItemStack?
- * }?}
+ * @returns {{ slot: number, oldItemStack: ItemStack, newItemStack: ItemStack? }?}
  */
 function getComparisonContainer(player, c0, c1) {
     const dropItem = isDropItem(player);
@@ -217,7 +207,6 @@ function getComparisonContainer(player, c0, c1) {
 }
 
 /**
- * アイテムが一致するかチェックする
  * @param {ItemStack} i0
  * @param {ItemStack} i1
  * @returns {boolean}
@@ -241,7 +230,6 @@ function check(i0, i1) {
 }
 
 /**
- * 配列が一致するかチェックする
  * @param {Array} arr1
  * @param {Array} arr2
  * @returns {boolean}

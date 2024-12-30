@@ -1,4 +1,4 @@
-import { Block, Entity, Player } from "@minecraft/server";
+import { Block, Entity, Player, world } from "@minecraft/server";
 
 /**
  * @param {string[]} args 
