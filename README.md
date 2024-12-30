@@ -7,7 +7,7 @@
 5. [playerRideAfterEvent](#anchor5)
 6. [playerGetOffAfterEvent](#anchor6)
 7. [playerXpChangeAfterEvent](#anchor7)
-8. [tagChangeAfterEvent](#anchor8)
+8. [entityTagChangeAfterEvent](#anchor8)
 9. [playerUseChestBeforeEvent](#anchor9)
 10. [playerUseChestAfterEvent](#anchor10)
 
@@ -18,7 +18,7 @@
 コマンドのprefixとidを設定します。
 
 ```javascript
-const commandSetting = {
+const commandSettings = {
     prefixs: ["!"],
     ids: ["a:b"]
 };
@@ -45,7 +45,7 @@ const commands = [
 コマンドを初期化します
 
 ```javascript
-const commandHandler = new CommandHandler(commandsPath, commandSetting, commands);
+const commandHandler = new CommandHandler(commandsPath, commandSettings, commands);
 ```
 
 チャットコマンドをチェックします
@@ -161,12 +161,12 @@ playerXpChangeAfterEvent.subscribe(ev => {
 
 <a id="anchor8"></a>
 
-# 8. tagChangeAfterEvent
+# 8. entityTagChangeAfterEvent
 
 エンティティのタグに変化が起きた時に呼び出されます
 
 ```javascript
-tagChangeAfterEvent.subscribe(ev => {
+entityTagChangeAfterEvent.subscribe(ev => {
     const { entity, tags, addTags, removeTags } = ev;
 
     entity.sendMessage(`tag - ${tags}`);
