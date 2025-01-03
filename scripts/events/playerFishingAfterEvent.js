@@ -59,6 +59,15 @@ world.beforeEvents.itemUse.subscribe(ev => {
 
 world.afterEvents.entitySpawn.subscribe(ev => {
     const { entity } = ev;
+    
+    //スポーンしたアイテムに時間のプロパティを追加
+    if (entity.typeId === "minecraft:item") {
+        entity.time = Date.now();
+    };
+});
+
+world.afterEvents.entitySpawn.subscribe(ev => {
+    const { entity } = ev;
 
     if (entity.typeId === "minecraft:fishing_hook") {
         const player = fishingPlayerQueue[0];
@@ -82,6 +91,9 @@ world.beforeEvents.entityRemove.subscribe(ev => {
             minDistance: 0,
             maxDistance: 0.2
         })[0];
+
+        //既にあるアイテムに釣竿が当たってた場合、終了
+        if (item?.time) return;
 
         /** @type {PlayerFishingAfterEvent} */
         let events = {};
