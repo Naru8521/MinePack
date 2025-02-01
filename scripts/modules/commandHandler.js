@@ -151,13 +151,11 @@ function getCommandDetails(commandsPath, commandSettings, commands, ev) {
             }
         }
     } else {
-        const { id, message } = ev;
-
         if (!commandSettings.ids || commandSettings.ids.length === 0) return undefined;
 
-        for (const ida of commandSettings.ids) {
-            if (id === ida) {
-                const parts = message.split(" ");
+        for (const id of commandSettings.ids) {
+            if (ev.id === id) {
+                const parts = ev.message.split(" ");
 
                 for (let i = 0; i < commandPaths.length; i++) {
                     const commandParts = commandStrings[i].split(" ");
