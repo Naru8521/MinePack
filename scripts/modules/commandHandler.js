@@ -86,7 +86,7 @@ export default class CommandHandler {
                     if (ev instanceof ChatSendBeforeEvent | ChatSendAfterEvent) {
                         module.run(remaining, { player: ev.sender });
                     } else {
-                        module.run(remaining, { player: ev.sourceEntity instanceof Player ? ev.sourceEntity : undefined, entity: ev.sourceEntity, initiator: ev.initiator, block: ev.sourceBlock });
+                        module.run(remaining, { player: ev.sourceEntity instanceof Player ? ev.sourceEntity : undefined, entity: ev.sourceEntity | ev.initiator, block: ev.sourceBlock });
                     }
                 } catch (e) {
                     console.error(e);
