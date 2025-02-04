@@ -1,5 +1,5 @@
 import { world } from "@minecraft/server";
-import DyProp from "./modules/dyProp";
+import DyProp from "./modules/DyProp";
 
 const dyProp = new DyProp(world);
 

@@ -1,16 +1,16 @@
 import { system, world } from "@minecraft/server";
-import CommandHandler from "./modules/commandHandler";
+import CommandHandler from "./modules/CommandHandler";
 
-/** @type {import("./modules/commandHandler").CommandsPath} */
+/** @type {import("./modules/CommandHandler").CommandsPath} */
 const commandsPath = "../commands";
 
-/** @type {import("./modules/commandHandler").CommandSettings} */
+/** @type {import("./modules/CommandHandler").CommandSettings} */
 const commandSettings = {
     prefixs: ["!"],
     ids: ["a:b"]
 };
 
-/** @type {import("./modules/commandHandler").Commands} */
+/** @type {import("./modules/CommandHandler").Commands} */
 const commands = [
     { 
         name: "test1"

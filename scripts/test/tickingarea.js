@@ -1,5 +1,5 @@
 import { system, world } from "@minecraft/server";
-import { TickingArea } from "./modules/tickingarea";
+import { TickingArea } from "./modules/Tickingarea";
 
 world.afterEvents.playerBreakBlock.subscribe(ev => {
     const { player, block } = ev;
