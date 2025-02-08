@@ -116,7 +116,9 @@ world.beforeEvents.entityRemove.subscribe(ev => {
             events.result = false;
         }
 
-        callbacks.forEach((_, callback) => callback(events));
+        system.run(() => {
+            callbacks.forEach((_, callback) => callback(events));
+        });
     }
 });
 
