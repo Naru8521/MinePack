@@ -8,6 +8,7 @@
 // import "./test/playerUseChestBeforeEvent";
 // import "./test/playerXpChangeAfterEvent";
 
-// import "./test/CommandHandler";
 // import "./test/DyProp";
 // import "./test/Tickingarea";
+
+// import "./commands/test1";

@@ -1,11 +1,26 @@
-import { Block, Entity, Player, world } from "@minecraft/server";
+import commandManager from "../modules/CommandManager";
 
-/**
- * @param {string[]} args 
- * @param {{ player: Player?, entity: Entity?, block: Block? }} ev 
- */
-export function run(args, ev) {
-    const { player, entity, block } = ev;
+const test1Command = commandManager.register({
+    prefixes: ["!"],
+    name: "test1",
+    description: "",
+    args: [
+        {
+            name: "a"
+        },
+        {
+            name: "test"
+        }
+    ]
+});
 
-    world.sendMessage("test1を実行しました");
-}
+// get all commands
+commandManager.getCommands();
+
+test1Command.onCommand((args, player) => {
+    // process
+});
+
+test1Command.onScriptCommand((args, initiator, entity, block) => {
+    // process
+});
