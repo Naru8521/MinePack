@@ -1,6 +1,6 @@
 ## 目次
 
-1. [commandHandler](#anchor1)
+1. [CommandManager](#anchor1)
 2. [playerDropBeforeEvent](#anchor2)
 3. [playerMoveAfterEvent](#anchor3)
 4. [playerFishingAfterEvent](#anchor4)
@@ -13,58 +13,35 @@
 
 <a id="anchor1"></a>
 
-# 1. commandHandler
-
-コマンドのprefixとidを設定します。
-
-```javascript
-const commandSettings = {
-    prefixs: ["!"],
-    ids: ["a:b"]
-};
-```
+# 1. CommandManager
 
 コマンドを設定します
 
 ```javascript
-const commands = [
-    {
-        name: "test1"
-    },
-    {
-        name: "test2",
-        subCommands: [
-            {
-                name: "a"
-            }
-        ]
-    }
-];
+const test1Command = commandManager.register({
+    prefixes: ["!"],
+    name: "test1",
+    description: "",
+    args: [
+        {
+            name: "a"
+        },
+        {
+            name: "test"
+        }
+    ]
+});
 ```
 
-コマンドを初期化します
+コマンドをチェックします
 
 ```javascript
-const commandHandler = new CommandHandler(commandsPath, commandSettings, commands);
-```
-
-チャットコマンドをチェックします
-
-```javascript
-world.beforeEvents.chatSend.subscribe(ev => {
-    if (commandHandler.isCommand(ev)) {
-        world.sendMessage("これはコマンドです。");
-    }
-
-    commandHandler.handleCommand(ev);
+test1Command.onCommand((args, player) => {
+    // process
 });
 
-system.afterEvents.scriptEventReceive.subscribe(ev => {
-    if (commandHandler.isCommand(ev)) {
-        world.sendMessage("これはコマンドです。");
-    }
-        
-    commandHandler.handleCommand(ev);
+test1Command.onScriptCommand((args, initiator, entity, block) => {
+    // process
 });
 ```
 
