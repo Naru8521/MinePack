@@ -3,7 +3,6 @@ import commandManager from "../modules/CommandManager";
 const test1Command = commandManager.register({
     prefixes: ["!"],
     name: "test1",
-    description: "",
     args: [
         {
             name: "a"
