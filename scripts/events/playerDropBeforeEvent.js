@@ -55,7 +55,6 @@ system.runInterval(() => {
             playerContainers.set(playerId, copyContainer(getContainer(player)));
             continue;
         }
-
         if (oldContainer && newContainer) {
             const comparison = getComparisonContainer(player, oldContainer, newContainer);
 
@@ -68,7 +67,7 @@ system.runInterval(() => {
                     container: newContainer,
                     oldItemStack: oldItemStack,
                     newItemStack: newItemStack,
-                    cancel: false,
+                    cancel: false
                 };
 
                 callbacks.forEach((_, callback) => callback(events));
@@ -76,9 +75,7 @@ system.runInterval(() => {
                 if (events.cancel) {
                     const dropItem = isDropItem(player);
 
-                    if (dropItem) {
-                        dropItem.remove();
-                    }
+                    if (dropItem) dropItem.remove();
 
                     setContainer(oldContainer, newContainer);
                     playerContainers.set(playerId, copyContainer(oldContainer));
