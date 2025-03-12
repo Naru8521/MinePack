@@ -6,16 +6,6 @@ import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, syst
  */
 
 /**
- * @typedef {Object} PlayerInputKeys 
- * @property {"W"} W
- * @property {"A"} A 
- * @property {"S"} S 
- * @property {"D"} D 
- * @property {"SPACE"} SPACE
- * @property {"SHIFT"} SHIFT 
- */
-
-/**
  * @typedef {"W" | "A" | "S" | "D" | "SPACE" | "SHIFT"} PlayerInputKey
  */
 
@@ -30,8 +20,7 @@ import { ButtonState, Dimension, InputButton, InputInfo, InputMode, Player, syst
 const callbacks = new Map();
 const playerBeforePressKeys = new Map();
 
-/** @type {Readonly<PlayerInputKeys>} */
-export const PlayerInputKeys = Object.freeze({
+export const PlayerInputKey = Object.freeze({
     W: "W",
     A: "A",
     S: "S",

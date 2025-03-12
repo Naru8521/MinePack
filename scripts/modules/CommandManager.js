@@ -4,6 +4,7 @@ import { ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent, system, world
  * @typedef {Object} CommandOptions
  * @property {string[]?} prefixes - Command prefixes
  * @property {string[]?} ids - Command ids
+ * @property {string[]?} tags - Command Permission（必要なタグ）
  * @property {string} name - Command name
  * @property {string?} description - Command description
  * @property {CommandArgument[]} [args] - List of command arguments
@@ -12,6 +13,7 @@ import { ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent, system, world
 /**
  * @typedef {Object} CommandArgument
  * @property {string} name - Argument name
+ * @property {string[]?} tags - Command Permission 
  * @property {"string" | "number" | "boolean"} [type] - Argument type
  * @property {CommandArgument[]} [args] - Nested arguments
  */
@@ -35,6 +37,31 @@ import { ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent, system, world
  * @param {Block?} sourceBlock
  */
 
+/**
+ * @callback OnCommandErrorHandler 
+ * @param {Player?} player 
+ * @param {Entity?} initiator 
+ * @param {Entity?} entity 
+ * @param {Block?} block 
+ * @param {ErrorType} errorType 
+ * @param {string} message 
+ * @param {extra?} any 
+ */
+
+/**
+ * @typedef {Object} ErrorType 
+ * @property {"Tag"} TAG 
+ * @property {"Arguments"} ARGS 
+ * @property {"Unknown"} UNKNOWN
+ */
+
+/** @type {ErrorType} */
+export const ErrorType = {
+    TAG: "Tag",         // タグによる権限エラー
+    ARGS: "Arguments",  // 引数の不正
+    UNKNOWN: "Unknown"  // その他
+};
+
 class Command {
     /**
      * @param {string[]} prefixes
@@ -42,18 +69,37 @@ class Command {
      * @param {string} name
      * @param {string} description
      * @param {CommandArgument[]} args
+     * @param {string[]} tags
      */
-    constructor(prefixes, ids, name, description, args) {
+    constructor(prefixes, ids, name, description, args, tags) {
         this.prefixes = prefixes;
         this.ids = ids;
         this.name = name;
         this.description = description;
         this.args = args || [];
+        this.tags = tags || [];
         this.onCommandHandler = null;
         this.onScriptCommandHandler = null;
+        /** 内部で利用するエラーハンドラ */
+        this._onCommandError = null;
     }
 
     /**
+     * エラー発生時の内部処理
+     * @param {string} errorType 
+     * @param {string} message 
+     * @param {any} [extra]
+     */
+    _error(player, initiator, entity, block, errorType, message, extra) {
+        if (this._onCommandError) {
+            this._onCommandError(player, initiator, entity, block, errorType, message, extra);
+        } else {
+            console.error(message, extra);
+        }
+    }
+
+    /**
+     * コマンド実行時のハンドラを設定する
      * @param {OnCommandHandler} onCommandHandler
      */
     onCommand(onCommandHandler) {
@@ -61,6 +107,7 @@ class Command {
     }
 
     /**
+     * スクリプトコマンド実行時のハンドラを設定する
      * @param {OnScriptCommandHandler} onScriptCommandHandler 
      */
     onScriptCommand(onScriptCommandHandler) {
@@ -68,19 +115,39 @@ class Command {
     }
 
     /**
+     * エラー発生時のコールバックを設定する
+     * @param {OnCommandErrorHandler} onCommandErrorHandler 
+     */
+    onCommandError(onCommandErrorHandler) {
+        this._onCommandError = onCommandErrorHandler;
+    }
+
+    /**
+     * @param {Player?} player 
+     * @param {Entity?} initiator 
+     * @param {Entity?} entity
+     * @param {Block?} block 
      * @param {string[]} rawArgs
      * @param {CommandArgument[]} argDefs
      * @returns {{parsedArgs: ParsedCommandArgs, valid: boolean}}
      */
-    parseArgs(rawArgs, argDefs) {
-        let parsedArgs = {};
+    parseArgs(player, initiator, entity, block, rawArgs, argDefs) {
+        const parsedArgs = {};
 
-        if (argDefs.length === 0 || rawArgs.length === 0) return { parsedArgs, valid: false };
+        if (argDefs.length === 0) {
+            if (rawArgs.length === 0) {
+                return { parsedArgs, valid: true };
+            } else {
+                this._error(player, initiator, entity, block, ErrorType.ARGS, `このコマンドは引数を受け付けませんが、余分な引数が渡されました。`);
+                return { parsedArgs, valid: false };
+            }
+        }
 
-        let commandName = rawArgs.shift();
-        let matchedArg = argDefs.find(arg => arg.name === commandName);
+        const commandName = rawArgs.shift();
+        const matchedArg = argDefs.find(arg => arg.name === commandName);
 
         if (!matchedArg) {
+            this._error(player, initiator, entity, block, ErrorType.ARGS, `不正な引数: ${commandName}`);
             return { parsedArgs: {}, valid: false };
         }
 
@@ -88,33 +155,31 @@ class Command {
             parsedArgs[matchedArg.name] = {};
 
             if (rawArgs.length !== matchedArg.args.length) {
-                console.error(`Incorrect number of arguments for ${matchedArg.name} (required: ${matchedArg.args.length}, received: ${rawArgs.length})`);
+                this._error(player, initiator, entity, block, ErrorType.ARGS, `Incorrect number of arguments for ${matchedArg.name} (required: ${matchedArg.args.length}, received: ${rawArgs.length})`);
                 return { parsedArgs: {}, valid: false };
             }
 
-            for (let argDef of matchedArg.args) {
+            for (const argDef of matchedArg.args) {
                 let value = rawArgs.shift();
 
                 if (argDef.type === "number") {
                     value = Number(value);
-
-                    if (isNaN(value)) {
-                        console.error(`Error parsing number: ${argDef.name}`);
+                    if (Number.isNaN(value)) {
+                        this._error(player, initiator, entity, block, ErrorType.ARGS, `Error parsing number: ${argDef.name}`);
                         return { parsedArgs: {}, valid: false };
                     }
                 } else if (argDef.type === "boolean") {
                     if (value !== "true" && value !== "false") {
-                        console.error(`Error parsing Boolean: ${argDef.name}`);
+                        this._error(player, initiator, entity, block, ErrorType.ARGS, `Error parsing Boolean: ${argDef.name}`);
                         return { parsedArgs: {}, valid: false };
                     }
-
                     value = value === "true";
                 }
 
                 parsedArgs[matchedArg.name][argDef.name] = value;
             }
         } else if (rawArgs.length > 0) {
-            console.error(`${matchedArg.name} has no arguments but has extra arguments`);
+            this._error(player, initiator, entity, block, ErrorType.ARGS, `${matchedArg.name} has no arguments but has extra arguments`);
             return { parsedArgs: {}, valid: false };
         }
 
@@ -122,15 +187,32 @@ class Command {
     }
 
     /**
+     * チャットコマンドを実行する
      * @param {string[]} rawArgs
      * @param {Player} sender
      * @returns {boolean} 
      */
     executeCommand(rawArgs, sender) {
+        // タグのチェック：コマンドに必要なタグが設定されている場合、プレイヤーがいずれかを持っているか確認する
+        if (this.tags.length > 0) {
+            let allowed = false;
+            
+            for (const tag of this.tags) {
+                if (sender.hasTag(tag)) {
+                    allowed = true;
+                    break;
+                }
+            }
+
+            if (!allowed) {
+                this._error(sender, undefined, undefined, undefined, ErrorType.TAG, `プレイヤーはこのコマンドを実行する権限がありません。（必要なタグ: ${this.tags.join(", ")}）`);
+                return false;
+            }
+        }
+
         if (!this.onCommandHandler) return false;
 
-        const { parsedArgs, valid } = this.parseArgs(rawArgs, this.args);
-
+        const { parsedArgs, valid } = this.parseArgs(sender, undefined, undefined, undefined, rawArgs, this.args);
         if (!valid) {
             return false;
         }
@@ -140,6 +222,7 @@ class Command {
     }
 
     /**
+     * スクリプトコマンドを実行する
      * @param {string[]} rawArgs 
      * @param {Entity} initiator 
      * @param {Entity} sourceEntity 
@@ -147,10 +230,24 @@ class Command {
      * @returns {boolean}
      */
     executeScriptCommand(rawArgs, initiator, sourceEntity, sourceBlock) {
+        // initiatorがプレイヤーであればタグのチェックを実施
+        if (this.tags.length > 0 && initiator && typeof initiator.hasTag === "function") {
+            let allowed = false;
+            for (const tag of this.tags) {
+                if (initiator.hasTag(tag)) {
+                    allowed = true;
+                    break;
+                }
+            }
+            if (!allowed) {
+                this._error(undefined, initiator, sourceEntity, sourceBlock, ErrorType.TAG, `実行者はこのコマンドを実行する権限がありません。（必要なタグ: ${this.tags.join(", ")}）`);
+                return false;
+            }
+        }
+
         if (!this.onScriptCommandHandler) return false;
 
-        const { parsedArgs, valid } = this.parseArgs(rawArgs, this.args);
-
+        const { parsedArgs, valid } = this.parseArgs(undefined, initiator, sourceEntity, sourceBlock, rawArgs, this.args);
         if (!valid) {
             return false;
         }
@@ -163,6 +260,9 @@ class Command {
 class CommandManager {
     constructor() {
         this.commands = new Map();
+        // CommandManager側のエラーハンドラは各コマンドへ伝播させます
+        this._onCommandError = null;
+
         world.beforeEvents.chatSend.subscribe(ev => {
             handleChatCommand(ev, this.commands);
         });
@@ -175,25 +275,24 @@ class CommandManager {
      * @param {CommandOptions} options
      * @returns {Command}
      */
-    register({ prefixes = [], ids = [], name, description = "", args }) {
+    register({ prefixes = [], ids = [], tags = [], name, description = "", args }) {
         if (prefixes.length === 0 && ids.length === 0) {
             throw new Error("prefixes or ids are not defined");
         }
-
         if (!name || name.trim() === "") {
             throw new Error("name is not defined.");
         }
 
-        const command = new Command(prefixes, ids, name, description, args);
+        const command = new Command(prefixes, ids, name, description, args, tags);
+        // CommandManager に設定されたエラーハンドラを各コマンドに伝播
+        command.onCommandError(this._onCommandError);
 
         prefixes.forEach(prefix => {
             this.commands.set(`${prefix}${name}`, command);
         });
-
         ids.forEach(id => {
             this.commands.set(id, command);
         });
-
         return command;
     }
 
@@ -203,9 +302,18 @@ class CommandManager {
     getCommands() {
         return [...this.commands.values()];
     }
+
+    /**
+     * エラー発生時のコールバックを登録する
+     * @param {(errorType: string, message: string, extra?: any) => void} callback 
+     */
+    onCommandError(callback) {
+        this._onCommandError = callback;
+    }
 }
 
 /**
+ * チャット送信前のイベントでコマンドを処理する
  * @param {ChatSendBeforeEvent} ev 
  * @param {Map<string, Command>} commands 
  */
@@ -218,19 +326,18 @@ function handleChatCommand(ev, commands) {
         const command = commands.get(commandKey);
         const executed = command.executeCommand(args, sender);
 
-        if (executed) {
-            ev.cancel = true;
-        }
+        if (executed) ev.cancel = true;
     }
 }
 
 /**
+ * スクリプトイベントでのコマンドを処理する
  * @param {ScriptEventCommandMessageAfterEvent} ev 
  * @param {Map<string, Command>} commands 
  */
 function handleScriptEventCommand(ev, commands) {
     const { id, message, initiator, sourceEntity, sourceBlock } = ev;
-    const args = message.trim().split(/_s+/);
+    const args = message.trim().split(/\s+/);
 
     if (commands.has(id)) {
         const command = commands.get(id);
