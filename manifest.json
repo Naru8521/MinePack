@@ -1,11 +1,11 @@
 {
     "format_version": 2,
     "header": {
-        "description": "LIBS\n製作:なるる\nYouTube:なるる-Naruru",
-        "name": "LIBS",
+        "description": "MinePack\n製作:なるる\nYouTube:なるる-Naruru",
+        "name": "MinePack",
         "uuid": "f97fb2d3-98c3-48e0-8888-2392e53e6ba3",
         "version": [1, 0, 0],
-        "min_engine_version": [1, 21, 0]
+        "min_engine_version": [1, 21, 70]
     },
     "modules": [
         {
@@ -20,11 +20,11 @@
     "dependencies": [
         {
             "module_name": "@minecraft/server",
-            "version": "2.0.0-alpha"
+            "version": "3.0.0-alpha"
         },
         {
             "module_name": "@minecraft/server-ui",
-            "version": "2.0.0-alpha"
+            "version": "3.0.0-alpha"
         }
     ]
 }
