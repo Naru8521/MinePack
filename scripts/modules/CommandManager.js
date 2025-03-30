@@ -331,7 +331,7 @@ class CommandManager {
  */
 function handleChatCommand(ev, commands) {
     const { sender, message } = ev;
-    const parts = message.trim().split(/\s+/);
+    const parts = splitArgs(message.trim());
 
     if (parts.length === 0) return;
 
@@ -371,16 +371,58 @@ function handleChatCommand(ev, commands) {
  */
 function handleScriptEventCommand(ev, commands) {
     const { id, message, initiator, sourceEntity, sourceBlock } = ev;
-    const firstWord = message.trim().split(/\s+/)[0] || "";
+    const parts = splitArgs(message.trim());
+    const firstWord = parts[0] || "";
     const commandKey = `${id}${firstWord}`;
-    const args = message.trim().split(/\s+/).slice(1);
+    const args = parts.slice(1);
 
     if (commands.has(commandKey)) {
         const command = commands.get(commandKey);
-
         executeScriptCommand(command, args, initiator, sourceEntity, sourceBlock);
     }
 }
+
+/**
+ * 引数文字列を空白で分割。ただし、""内や{}内の空白は無視。
+ * @param {string} input
+ * @returns {string[]}
+ */
+function splitArgs(input) {
+    const args = [];
+    let current = '';
+    let inQuotes = false;
+    let braceCount = 0;
+
+    for (let i = 0; i < input.length; i++) {
+        const char = input[i];
+
+        if (char === '"') {
+            inQuotes = !inQuotes;
+            current += char;
+            continue;
+        }
+
+        if (!inQuotes) {
+            if (char === '{') braceCount++;
+            if (char === '}') braceCount--;
+        }
+
+        if (char === ' ' && !inQuotes && braceCount === 0) {
+            if (current) {
+                args.push(current);
+                current = '';
+            }
+            continue;
+        }
+
+        current += char;
+    }
+
+    if (current) args.push(current);
+
+    return args;
+}
+
 
 const commandManager = new CommandManager();
 export default commandManager;
