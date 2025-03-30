@@ -8,6 +8,7 @@ import { ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent, system, world
  * @property {string} name - Command name
  * @property {string?} description - Command description
  * @property {CommandArgument[]} [args] - List of command arguments
+ * @property {CommandArgument[]} [optionalArgs] 
  */
 
 /**
@@ -16,6 +17,7 @@ import { ChatSendBeforeEvent, ScriptEventCommandMessageAfterEvent, system, world
  * @property {string[]?} tags - Command Permission 
  * @property {"string" | "number" | "boolean"} [type] - Argument type
  * @property {CommandArgument[]} [args] - Nested arguments
+ * @property {CommandArgument[]} [optionalArgs] 
  */
 
 /**
@@ -71,12 +73,13 @@ class Command {
      * @param {CommandArgument[]} args
      * @param {string[]} tags
      */
-    constructor(prefixes, ids, name, description, args, tags) {
+    constructor(prefixes, ids, name, description, args, optionalArgs, tags) {
         this.prefixes = prefixes;
         this.ids = ids;
         this.name = name;
         this.description = description;
         this.args = args || [];
+        this.optionalArgs = optionalArgs || [];
         this.tags = tags || [];
         this.onCommandHandler = null;
         this.onScriptCommandHandler = null;
@@ -135,16 +138,14 @@ function _error(command, player, initiator, entity, block, errorType, message, e
  * @param {Block?} block 
  * @param {string[]} rawArgs
  * @param {CommandArgument[]} argDefs
+ * @param {CommandArgument[]} optionalArgDefs
  * @returns {{parsedArgs: ParsedCommandArgs, valid: boolean, extraArgs: string[]}}
  */
-function parseArgs(command, player, initiator, entity, block, rawArgs, argDefs) {
+function parseArgs(command, player, initiator, entity, block, rawArgs, argDefs, optionalArgDefs = []) {
     const parsedArgs = {};
     const extraArgs = [];
 
-    if (argDefs.length === 0) {
-        return { parsedArgs, valid: true, extraArgs: rawArgs };
-    }
-
+    // 必須引数の処理
     for (const argDef of argDefs) {
         let value = rawArgs.shift();
 
@@ -153,34 +154,61 @@ function parseArgs(command, player, initiator, entity, block, rawArgs, argDefs) 
             return { parsedArgs: {}, valid: false, extraArgs: [] };
         }
 
-        if (!argDef.type) {
-            if (value !== argDef.name) {
-                _error(command, player, initiator, entity, block, ErrorType.ARGS, `不正な引数です: ${value}, 期待される値: ${argDef.name}`);
-                return { parsedArgs: {}, valid: false, extraArgs: [] };
-            }
-            continue;
-        }
+        const result = parseSingleArg(command, player, initiator, entity, block, argDef, value);
 
-        if (argDef.type === "number") {
-            value = Number(value);
-            if (Number.isNaN(value)) {
-                _error(command, player, initiator, entity, block, ErrorType.ARGS, `数値に変換できません: ${argDef.name}`);
-                return { parsedArgs: {}, valid: false, extraArgs: [] };
-            }
-        } else if (argDef.type === "boolean") {
-            if (value !== "true" && value !== "false") {
-                _error(command, player, initiator, entity, block, ErrorType.ARGS, `ブール値に変換できません: ${argDef.name}`);
-                return { parsedArgs: {}, valid: false, extraArgs: [] };
-            }
-            value = value === "true";
-        }
+        if (!result.valid) return { parsedArgs: {}, valid: false, extraArgs: [] };
 
-        parsedArgs[argDef.name] = value;
+        parsedArgs[argDef.name] = result.value;
+    }
+
+    // オプション引数の処理
+    for (const argDef of optionalArgDefs) {
+        let value = rawArgs.shift();
+
+        if (value === undefined) break;
+
+        const result = parseSingleArg(command, player, initiator, entity, block, argDef, value);
+
+        if (!result.valid) return { parsedArgs: {}, valid: false, extraArgs: [] };
+        
+        parsedArgs[argDef.name] = result.value;
     }
 
     extraArgs.push(...rawArgs);
 
     return { parsedArgs, valid: true, extraArgs };
+}
+
+/**
+ * 単一引数を解析するヘルパー関数
+ */
+function parseSingleArg(command, player, initiator, entity, block, argDef, value) {
+    if (!argDef.type) {
+        if (value !== argDef.name) {
+            _error(command, player, initiator, entity, block, ErrorType.ARGS, `不正な引数です: ${value}, 期待される値: ${argDef.name}`);
+            return { valid: false };
+        }
+
+        return { valid: true, value };
+    }
+
+    if (argDef.type === "number") {
+        value = Number(value);
+
+        if (Number.isNaN(value)) {
+            _error(command, player, initiator, entity, block, ErrorType.ARGS, `数値に変換できません: ${argDef.name}`);
+            return { valid: false };
+        }
+    } else if (argDef.type === "boolean") {
+        if (value !== "true" && value !== "false") {
+            _error(command, player, initiator, entity, block, ErrorType.ARGS, `ブール値に変換できません: ${argDef.name}`);
+            return { valid: false };
+        }
+        
+        value = value === "true";
+    }
+
+    return { valid: true, value };
 }
 
 /**
@@ -209,7 +237,7 @@ function executeCommand(command, rawArgs, sender) {
 
     if (!command.onCommandHandler) return false;
 
-    const { parsedArgs, valid, extraArgs } = parseArgs(command, sender, undefined, undefined, undefined, rawArgs, command.args);
+    const { parsedArgs, valid, extraArgs } = parseArgs(command, sender, undefined, undefined, undefined, rawArgs, command.args, command.optionalArgs);
 
     if (!valid) {
         return false;
@@ -238,7 +266,8 @@ function executeScriptCommand(command, rawArgs, initiator, sourceEntity, sourceB
         sourceEntity, 
         sourceBlock, 
         rawArgs, 
-        command.args
+        command.args,
+        command.optionalArgs
     );
 
     if (!valid) {
@@ -265,7 +294,7 @@ class CommandManager {
      * @param {CommandOptions} options
      * @returns {Command}
      */
-    register({ prefixes = [], ids = [], tags = [], name, description = "", args }) {
+    register({ prefixes = [], ids = [], tags = [], name, description = "", args, optionalArgs }) {
         if (prefixes.length === 0 && ids.length === 0) {
             throw new Error("prefixes or ids are not defined");
         }
@@ -273,13 +302,13 @@ class CommandManager {
         if (!name || name.trim() === "") {
             throw new Error("name is not defined.");
         }
-
-        const command = new Command(prefixes, ids, name, description, args, tags);
+    
+        const command = new Command(prefixes, ids, name, description, args, optionalArgs, tags);
         
         prefixes.forEach(prefix => {
             this.commands.set(`${prefix}${name}`, command);
         });
-
+    
         ids.forEach(id => {
             this.commands.set(`${id}${name}`, command);
         });
