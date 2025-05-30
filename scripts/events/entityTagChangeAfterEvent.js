@@ -1,4 +1,4 @@
-import { system, world, Entity } from "@minecraft/server";
+import { system, world, Entity, DimensionTypes } from "@minecraft/server";
 
 /**
  * @callback EntityTagChangeAfterCallback
@@ -39,7 +39,7 @@ export default class entityTagChangeAfterEvent {
     }
 }
 
-const dimensionIds = ["minecraft:overworld", "minecraft:nether", "minecraft:the_end"];
+const dimensionIds = DimensionTypes.getAll().map(v => v.typeId);
 
 system.runInterval(() => {
     for (const dimensionId of dimensionIds) {
