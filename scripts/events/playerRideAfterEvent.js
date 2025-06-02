@@ -1,3 +1,5 @@
+// @ts-check
+
 import { world, Player, Entity, system } from "@minecraft/server";
 
 /**
@@ -8,7 +10,7 @@ import { world, Player, Entity, system } from "@minecraft/server";
 /**
  * @typedef {Object} PlayerRideAfterEvent
  * @property {Player} player - The player who caused the event
- * @property {Entity} entity - Entities trying to get on
+ * @property {Entity | undefined} entity - Entities trying to get on
  */
 
 const callbacks = new Map();
@@ -45,7 +47,7 @@ system.runInterval(() => {
         const isRiding = player.getComponent("riding");
 
         if (isRiding && !ridingPlayers.has(player.id)) {
-            const target = player.getComponent("riding").entityRidingOn;
+            const target = player.getComponent("riding")?.entityRidingOn;
             /** @type {PlayerRideAfterEvent} */
             let events = {
                 player,

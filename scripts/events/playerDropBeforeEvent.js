@@ -1,3 +1,5 @@
+// @ts-check
+
 import { system, world, Player, Container, ItemStack, Entity } from "@minecraft/server";
 
 /**

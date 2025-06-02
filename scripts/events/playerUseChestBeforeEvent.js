@@ -1,3 +1,5 @@
+// @ts-check
+
 import { Block, Container, Player, world } from "@minecraft/server";
 
 /**
@@ -11,7 +13,7 @@ import { Block, Container, Player, world } from "@minecraft/server";
  * @property {Block} interactBlock - Blocks used
  * @property {boolean} isFirstEvent - Whether the first event
  * @property {boolean} isLarge - Large chest or not
- * @property {ChestPair?} chestPair - Exists only when isLarge is true
+ * @property {ChestPair | undefined} chestPair - Exists only when isLarge is true
  * @property {boolean} cancel - Cancel Event
  */
 

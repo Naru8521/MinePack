@@ -1,4 +1,6 @@
-import { Block, BlockComponentTypes, BlockVolume, BoundingBoxUtils, Container, Player, world } from "@minecraft/server";
+// @ts-check
+
+import { Block, Container, Player, world } from "@minecraft/server";
 
 /**
  * @callback PlayerUseChestAfterEventCallback
@@ -11,7 +13,7 @@ import { Block, BlockComponentTypes, BlockVolume, BoundingBoxUtils, Container, P
  * @property {Block} interactBlock - Blocks used
  * @property {boolean} isFirstEvent - Whether the first event
  * @property {boolean} isLarge - Large chest or not
- * @property {ChestPair?} chestPair - Exists only when isLarge is true
+ * @property {ChestPair | undefined} chestPair - Exists only when isLarge is true
  */
 
 /**

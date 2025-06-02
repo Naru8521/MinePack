@@ -1,3 +1,5 @@
+// @ts-check
+
 import { system, world, Entity, DimensionTypes } from "@minecraft/server";
 
 /**

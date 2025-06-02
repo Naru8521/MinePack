@@ -1,3 +1,5 @@
+// @ts-check
+
 import { world, system, Player, ItemStack, Entity } from "@minecraft/server";
 
 /**
@@ -96,7 +98,12 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         if (item?.time) return;
 
         /** @type {PlayerFishingAfterEvent} */
-        let events = {};
+        let events = {
+            result: false,
+            player: undefined,
+            itemEntity: undefined,
+            itemStack: undefined
+        };
 
         const ids = fishingEntityIds.keys();
 
