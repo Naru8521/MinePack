@@ -61,9 +61,10 @@ world.beforeEvents.itemUse.subscribe(ev => {
 
 world.afterEvents.entitySpawn.subscribe(ev => {
     const { entity } = ev;
-    
+
     //スポーンしたアイテムに時間のプロパティを追加
     if (entity.typeId === "minecraft:item") {
+        // @ts-ignore
         entity.time = Date.now();
     };
 });
@@ -95,6 +96,7 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         })[0];
 
         //既にあるアイテムに釣竿が当たってた場合、終了
+        // @ts-ignore
         if (item?.time) return;
 
         /** @type {PlayerFishingAfterEvent} */
@@ -118,7 +120,7 @@ world.beforeEvents.entityRemove.subscribe(ev => {
         if (item) {
             events.result = true;
             events.itemEntity = item;
-            events.itemStack = item.getComponent("item").itemStack;
+            events.itemStack = item.getComponent("item")?.itemStack;
         } else {
             events.result = false;
         }
